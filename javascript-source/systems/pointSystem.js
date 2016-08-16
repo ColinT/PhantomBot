@@ -816,29 +816,39 @@
      * @event initReady
      */
     $.bind('initReady', function() {
-        $.registerChatCommand('./systems/pointSystem.js', 'makeitrain', 1);
-        $.registerChatCommand('./systems/pointSystem.js', 'points', 7);
-        $.registerChatCommand('./systems/pointSystem.js', 'gift', 7);
-        $.registerChatCommand('./systems/pointSystem.js', 'penalty', 2);
+        if ($.bot.isModuleEnabled('./systems/pointSystem.js')) {
+            $.registerChatCommand('./systems/pointSystem.js', 'makeitrain', 1);
+            $.registerChatCommand('./systems/pointSystem.js', 'points', 7);
+            $.registerChatCommand('./systems/pointSystem.js', 'point', 7);
+            $.registerChatCommand('./systems/pointSystem.js', 'gift', 7);
+            $.registerChatCommand('./systems/pointSystem.js', 'penalty', 2);
 
-        $.registerChatSubcommand('points', 'add', 1);
-        $.registerChatSubcommand('points', 'give', 1);
-        $.registerChatSubcommand('points', 'take', 1);
-        $.registerChatSubcommand('points', 'remove', 1);
-        $.registerChatSubcommand('points', 'set', 1);
-        $.registerChatSubcommand('points', 'all', 1);
-        $.registerChatSubcommand('points', 'takeall', 1);
-        $.registerChatSubcommand('points', 'setname', 1);
-        $.registerChatSubcommand('points', 'setgain', 1);
-        $.registerChatSubcommand('points', 'setofflinegain', 1);
-        $.registerChatSubcommand('points', 'setinterval', 1);
-        $.registerChatSubcommand('points', 'bonus', 1);
-        $.registerChatSubcommand('points', 'resetall', 1);
-        $.registerChatSubcommand('points', 'setmessage', 1);
-        $.registerChatSubcommand('points', 'setactivebonus', 1);
+            /** Panel commands*/
+            $.registerChatCommand('./systems/pointSystem.js', 'reloadpoints', 1);
+            $.registerChatCommand('./systems/pointSystem.js', 'pointsallpanel', 1);
+            $.registerChatCommand('./systems/pointSystem.js', 'pointsbonuspanel', 1);
+            $.registerChatCommand('./systems/pointSystem.js', 'pointstakeallpanel', 1);
+            /** Panel commands */
 
-        if (pointNameSingle != 'point' || pointNameMultiple != 'points') {
-            updateSettings();
+            $.registerChatSubcommand('points', 'add', 1);
+            $.registerChatSubcommand('points', 'give', 1);
+            $.registerChatSubcommand('points', 'take', 1);
+            $.registerChatSubcommand('points', 'remove', 1);
+            $.registerChatSubcommand('points', 'set', 1);
+            $.registerChatSubcommand('points', 'all', 1);
+            $.registerChatSubcommand('points', 'takeall', 1);
+            $.registerChatSubcommand('points', 'setname', 1);
+            $.registerChatSubcommand('points', 'setgain', 1);
+            $.registerChatSubcommand('points', 'setofflinegain', 1);
+            $.registerChatSubcommand('points', 'setinterval', 1);
+            $.registerChatSubcommand('points', 'user', 7);
+            $.registerChatSubcommand('points', 'check', 7);
+            $.registerChatSubcommand('points', 'bonus', 1);
+            $.registerChatSubcommand('points', 'resetall', 1);
+
+            if (pointNameSingle != 'point' && pointNameMultiple != 'points') {
+               updateSettings();
+            }
         }
     });
 
