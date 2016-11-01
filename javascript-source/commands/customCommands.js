@@ -1,33 +1,16 @@
-/*
- * Copyright (C) 2016-2021 phantombot.github.io/PhantomBot
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
+(function() {
 
-(function () {
-    // Pre-build regular expressions.z
-    var reCommandTag = new RegExp(/\(command\s([\w]+)\)/),
-            customCommands = [],
-            ScriptEventManager = Packages.tv.phantombot.script.ScriptEventManager,
-            CommandEvent = Packages.tv.phantombot.event.command.CommandEvent;
+    // Pre-build regular expressions.
+    var reCustomAPI = new RegExp(/\(customapi\s([\w\W:\/\$\=\?\&]+)\)/), // URL[1]
+        reCustomAPIJson = new RegExp(/\(customapijson ([\w\.:\/\$=\?\&]+)\s([\w\W]+)\)/), // URL[1], JSONmatch[2..n]
+        reCustomAPITextTag = new RegExp(/{([\w\W]+)}/),
+        reCommandTag = new RegExp(/\(command\s([\w]+)\)/),
+        tagCheck = new RegExp(/\(age\)|\(sender\)|\(@sender\)|\(baresender\)|\(random\)|\(1\)|\(count\)|\(pointname\)|\(price\)|\(#\)|\(uptime\)|\(follows\)|\(game\)|\(status\)|\(touser\)|\(echo\)|\(alert [,.\w]+\)|\(readfile|\(1=|\(countdown=|\(downtime\)|\(paycom\)|\(onlineonly\)|\(offlineonly\)|\(code=|\(followage\)|\(gameinfo\)|\(titleinfo\)|\(gameonly=|\(playtime\)|\(gamesplayed\)|\(pointtouser\)|\(customapi |\(customapijson /);
 
-    /*
-     * @function runCommand
-     *
-     * @param {string} username
-     * @param {string} command
-     * @param {string} args
+    /**
+     * @function getCustomAPIValue
+     * @param {string} url
+     * @returns {string}
      */
     function runCommand(username, command, args, tags) {
         if (tags !== undefined) {
