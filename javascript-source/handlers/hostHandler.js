@@ -96,8 +96,28 @@
             };
         }
 
-        if (s.match(/\(name\)/)) {
-            s = $.replace(s, '(name)', $.username.resolve(hoster));
+        /** Replace the tags in the host message */
+        msg = msg.replace('(name)', hoster);
+        msg = msg.replace('(reward)', autoHostReward.toString());
+        msg = msg.replace('(viewers)', viewers.toString());
+        $.say(msg.replace('/w', ' /w'));
+
+        /** is there a host reward set? */
+        if (autoHostReward > 0) {
+            /** Give the hoster points */
+            $.inidb.incr('points', hoster.toLowerCase(), autoHostReward);
+        }
+    });
+
+    /**
+     * Gets the host event from the core.
+     *
+     * @event twitchHosted
+     */
+    $.bind('twitchHosted', function(event) {
+        /** is the module enabled? */
+        if (!$.bot.isModuleEnabled('./handlers/hostHandler.js')) {
+            return;
         }
 
         if (s.match(/\(reward\)/)) {
