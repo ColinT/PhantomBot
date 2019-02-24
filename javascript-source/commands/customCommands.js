@@ -5,7 +5,10 @@
         reCustomAPIJson = new RegExp(/\(customapijson ([\w\.:\/\$=\?\&]+)\s([\w\W]+)\)/), // URL[1], JSONmatch[2..n]
         reCustomAPITextTag = new RegExp(/{([\w\W]+)}/),
         reCommandTag = new RegExp(/\(command\s([\w]+)\)/),
-        tagCheck = new RegExp(/\(age\)|\(sender\)|\(@sender\)|\(baresender\)|\(random\)|\(1\)|\(count\)|\(pointname\)|\(price\)|\(#\)|\(uptime\)|\(follows\)|\(game\)|\(status\)|\(touser\)|\(echo\)|\(alert [,.\w]+\)|\(readfile|\(1=|\(countdown=|\(downtime\)|\(paycom\)|\(onlineonly\)|\(offlineonly\)|\(code=|\(followage\)|\(gameinfo\)|\(titleinfo\)|\(gameonly=|\(playtime\)|\(gamesplayed\)|\(pointtouser\)|\(customapi |\(customapijson /);
+        tagCheck = new RegExp(/\(views\)|\(subscribers\)|\(age\)|\(sender\)|\(@sender\)|\(baresender\)|\(random\)|\(1\)|\(2\)|\(3\)|\(count\)|\(pointname\)|\(points\)|\(currenttime|\(price\)|\(#|\(uptime\)|\(follows\)|\(game\)|\(status\)|\(touser\)|\(echo\)|\(alert [,.\w]+\)|\(readfile|\(1=|\(countdown=|\(countup=|\(downtime\)|\(pay\)|\(onlineonly\)|\(offlineonly\)|\(code=|\(followage\)|\(gameinfo\)|\(titleinfo\)|\(gameonly=|\(useronly=|\(playtime\)|\(gamesplayed\)|\(pointtouser\)|\(lasttip\)|\(writefile .+\)|\(readfilerand|\(team_|\(commandcostlist\)|\(playsound |\(customapi |\(customapijson /),
+        customCommands = [],
+        ScriptEventManager = Packages.tv.phantombot.script.ScriptEventManager,
+        CommandEvent = Packages.tv.phantombot.event.command.CommandEvent;
 
     /**
      * @function getCustomAPIValue
@@ -36,6 +39,629 @@
                 $.inidb.incr('points', sender, $.inidb.get('pricecom', command));
             }
         }
+    }
+
+    /*
+     * @function tags
+     *
+     * @param {string} event
+     * @param {string} message
+     * @return {string}
+     */
+    function tags(event, message, atEnabled) {
+        if (atEnabled && event.getArgs()[0] !== undefined && $.isModv3(event.getSender(), event.getTags())) {
+            if (!message.match(tagCheck)) {
+                return event.getArgs()[0] + ' -> ' + message;
+            }
+        }
+
+        if (message.match(/\(views\)/g)) {
+            message = $.replace(message, '(views)', $.twitchcache.getViews());
+        }
+
+        if (message.match(/\(gameonly=.*\)/g)) {
+            var game = message.match(/\(gameonly=(.*)\)/)[1];
+
+            if (!$.getGame($.channelName).equalsIgnoreCase(game)) {
+                return null;
+            }
+            message = $.replace(message, message.match(/(\(gameonly=.*\))/)[1], '');
+        }
+
+        if (message.match(/\(useronly=.*\)/g)) {
+            var user = message.match(/\(useronly=(.*?)\)/)[1];
+            if (!event.getSender().equalsIgnoreCase(user)) {
+                if ($.getIniDbBoolean('settings', 'permComMsgEnabled', true)) {
+                    $.say($.whisperPrefix(event.getSender()) + $.lang.get('cmd.useronly', user));
+                }
+                return null;
+            }
+            message = $.replace(message, message.match(/(\(useronly=.*?\))/)[1], '');
+        }
+
+        if (message.match(/\(readfile/)) {
+            if (message.search(/\((readfile ([^)]+)\))/g) >= 0) {
+                message = $.replace(message, '(' + RegExp.$1, $.readFile('./addons/' + RegExp.$2)[0]);
+            }
+        }
+
+        if (message.match(/\(readfilerand/)) {
+            if (message.search(/\((readfilerand ([^)]+)\))/g) >= 0) {
+                var path = RegExp.$2;
+                var path2 = RegExp.$1;
+                var results = $.arrayShuffle($.readFile('./addons/' + path.trim()));
+                message = $.replace(message, '(' + path2.trim(), $.randElement(results));
+            }
+        }
+
+        if (message.match(/\(adminonlyedit\)/)) {
+            message = $.replace(message, '(adminonlyedit)', '');
+        }
+
+        if (message.match(/\(pointtouser\)/)) {
+            if (event.getArgs()[0] !== undefined) {
+                message = $.replace(message, '(pointtouser)', (String(event.getArgs()[0]).replace(/[^a-zA-Z0-9_@]/ig, '') + ' -> '));
+            } else {
+                message = $.replace(message, '(pointtouser)', $.userPrefix(event.getSender(), true));
+            }
+        }
+
+        if (message.match(/\(currenttime/)) {
+            var timezone = message.match(/\(currenttime ([\w\W]+), (.*)\)/)[1],
+                format = message.match(/\(currenttime ([\w\W]+), (.*)\)/)[2];
+
+            message = $.replace(message, message.match(/\(currenttime ([\w\W]+), (.*)\)/)[0], $.getCurrentLocalTimeString(format, timezone));
+        }
+
+        if (message.match(/\(1\)/g)) {
+            for (var i = 1; i < 10; i++) {
+                if (message.includes('(' + i + ')')) {
+                    message = $.replace(message, '(' + i + ')', (event.getArgs()[i - 1] !== undefined ? event.getArgs()[i - 1] : ''));
+                } else {
+                    break;
+                }
+            }
+        }
+
+        if (message.match(/\(commandcostlist\)/)) {
+            var keys = $.inidb.GetKeyList('pricecom', ''),
+                temp = [],
+                i;
+            for (i in keys) {
+                if (!keys[i].includes(' ')) {
+                    temp.push('!' + keys[i] + ': ' + $.getPointsString($.inidb.get('pricecom', keys[i])));
+                }
+            }
+            $.paginateArray(temp, 'NULL' + message.replace('(commandcostlist)', ''), ', ', true, event.getSender());
+            return null;
+        }
+
+        if (message.match(/\(1=[^)]+\)/g)) {
+            if (event.getArgs()[0]) {
+                var t = message.match(/\(1=[^)]+\)/)[0];
+                message = $.replace(message, t, event.getArgs()[0]);
+            }
+            message = $.replace(message, '(1=', '(');
+        }
+
+        if (message.match(/\(countdown=[^)]+\)/g)) {
+            var t = message.match(/\([^)]+\)/)[0],
+                countdown, time;
+            countdown = t.replace('(countdown=', '').replace(')', '');
+            time = (Date.parse(countdown) - Date.parse($.getLocalTime()));
+            message = $.replace(message, t, $.getCountString(time / 1000, false));
+        }
+
+        if (message.match(/\(countup=[^)]+\)/g)) {
+            var t = message.match(/\([^)]+\)/)[0],
+                countup, time;
+            countup = t.replace('(countup=', '').replace(')', '');
+            time = (Date.parse($.getLocalTime()) - Date.parse(countup));
+            message = $.replace(message, t, $.getCountString(time / 1000, true));
+        }
+
+        if (message.match(/\(downtime\)/g)) {
+            message = $.replace(message, '(downtime)', String($.getStreamDownTime()));
+        }
+
+        if (message.match(/\(channelname\)/g)) {
+            message = $.replace(message, '(channelname)', $.username.resolve($.channelName));
+        }
+
+        if (message.match(/\(onlineonly\)/g)) {
+            if (!$.isOnline($.channelName)) {
+                returnCommandCost(event.getSender(), event.getCommand(), $.isModv3(event.getSender(), event.getTags()));
+                return null;
+            }
+            message = $.replace(message, '(onlineonly)', '');
+        }
+
+        if (message.match(/\(offlineonly\)/g)) {
+            if ($.isOnline($.channelName)) {
+                returnCommandCost(event.getSender(), event.getCommand(), $.isModv3(event.getSender(), event.getTags()));
+                return null;
+            }
+            message = $.replace(message, '(offlineonly)', '');
+        }
+
+        if (message.match(/\(sender\)/g)) {
+            message = $.replace(message, '(sender)', $.username.resolve(event.getSender()));
+        }
+
+        if (message.match(/\(senderrank\)/g)) {
+            message = $.replace(message, '(senderrank)', $.resolveRank(event.getSender()));
+        }
+
+        if (message.match(/\(@sender\)/g)) {
+            message = $.replace(message, '(@sender)', $.userPrefix(event.getSender(), true));
+        }
+
+        if (message.match(/\(baresender\)/g)) {
+            message = $.replace(message, '(baresender)', event.getSender());
+        }
+
+        if (message.match(/\(game\)/g)) {
+            message = $.replace(message, '(game)', $.getGame($.channelName));
+        }
+
+        if (message.match(/\(status\)/g)) {
+            message = $.replace(message, '(status)', $.getStatus($.channelName));
+        }
+
+        if (message.match(/\(count\)/g)) {
+            $.inidb.incr('commandCount', event.getCommand(), 1);
+            message = $.replace(message, '(count)', $.inidb.get('commandCount', event.getCommand()));
+        }
+
+        if (message.match(/\(keywordcount\s(.+)\)/g)) {
+            var input_keyword = message.match(/.*\(keywordcount\s(.+)\).*/)[1],
+                keyword_info = JSON.parse($.inidb.get('keywords', input_keyword));
+
+            if ('count' in keyword_info) {
+                ++keyword_info["count"];
+            } else {
+                keyword_info["count"] = 1;
+            }
+            $.inidb.set('keywords', input_keyword, JSON.stringify(keyword_info));
+
+            message = $.replace(message, '(keywordcount ' + input_keyword + ')', keyword_info["count"]);
+        }
+
+        if (message.match(/\(random\)/g)) {
+            try {
+                message = $.replace(message, '(random)', $.username.resolve($.randElement($.users)[0]));
+            } catch (ex) {
+                message = $.replace(message, '(random)', $.username.resolve($.botName));
+            }
+        }
+
+        if (message.match(/\(randomrank\)/g)) {
+            try {
+                message = $.replace(message, '(randomrank)', $.resolveRank($.randElement($.users)[0]));
+            } catch (ex) {
+                message = $.replace(message, '(randomrank)', $.resolveRank($.botName));
+            }
+        }
+
+        if (message.match(/\(pointname\)/g)) {
+            message = $.replace(message, '(pointname)', $.pointNameMultiple);
+        }
+
+        if (message.match(/\(points\)/g)) {
+            message = $.replace(message, '(points)', $.getUserPoints(event.getSender()));
+        }
+
+        if (message.match(/\(price\)/g)) {
+            message = $.replace(message, '(price)', String($.inidb.exists('pricecom', event.getCommand()) ? $.getPointsString($.inidb.get('pricecom', event.getCommand())) : $.getPointsString(0)));
+        }
+
+        if (message.match(/\(pay\)/g)) {
+            message = $.replace(message, '(pay)', String($.inidb.exists('paycom', event.getCommand()) ? $.getPointsString($.inidb.get('paycom', event.getCommand())) : $.getPointsString(0)));
+        }
+
+        if (message.match(/\(#\)/g)) {
+            message = $.replace(message, '(#)', String($.randRange(1, 100)));
+        }
+
+        if (message.match(/\(# (\d+),(\d+)\)/g)) {
+            var mat = message.match(/\(# (\d+),(\d+)\)/);
+            message = $.replace(message, mat[0], String($.randRange(parseInt(mat[1]), parseInt(mat[2]))));
+        }
+
+        if (message.match(/\(viewers\)/g)) {
+            message = $.replace(message, '(viewers)', String($.getViewers($.channelName) + ' '));
+        }
+
+        if (message.match(/\(follows\)/g)) {
+            message = $.replace(message, '(follows)', String($.getFollows($.channelName) + ' '));
+        }
+
+        if (message.match(/\(subscribers\)/g)) {
+            message = $.replace(message, '(subscribers)', String($.getSubscriberCount() + ' '));
+        }
+
+        if (message.match(/\(touser\)/g)) {
+            message = $.replace(message, '(touser)', (event.getArgs()[0] === undefined ? $.username.resolve(event.getSender()) : String(event.getArgs()[0]).replace(/[^a-zA-Z0-9_@]/ig, '')));
+        }
+
+        if (message.match(/\(echo\)/g)) {
+            message = $.replace(message, '(echo)', (event.getArguments() ? event.getArguments() : ''));
+        }
+
+        if (message.match(/\(gamesplayed\)/g)) {
+            if (!$.isOnline($.channelName)) {
+                $.say($.userPrefix(event.getSender(), true) + $.lang.get('timesystem.uptime.offline', $.channelName));
+                return null;
+            }
+            message = $.replace(message, '(gamesplayed)', $.getGamesPlayed());
+        }
+
+        if (message.match(/\(code=/g)) {
+            var code = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789',
+                length = message.substr(6).replace(')', ''),
+                text = '',
+                i;
+
+            for (i = 0; i < length; i++) {
+                text += code.charAt(Math.floor(Math.random() * code.length));
+            }
+            message = $.replace(message, '(code=' + length + ')', String(text));
+        }
+
+        if (message.match(/\(alert [,.\w\W]+\)/g)) {
+            var filename = message.match(/\(alert ([,.\w\W]+)\)/)[1];
+            $.panelsocketserver.alertImage(filename);
+            message = (message + '').replace(/\(alert [,.\w\W]+\)/, '');
+            if (message == '') return null;
+        }
+
+        if (message.match(/\(gameinfo\)/)) {
+            if ($.getGame($.channelName) == ' ' || $.getGame($.channelName) == '') {
+                message = $.replace(message, '(gameinfo)', $.lang.get('streamcommand.game.no.game'));
+            } else if (!$.isOnline($.channelName) || $.getPlayTime() == 0) {
+                message = $.replace(message, '(gameinfo)', $.lang.get('streamcommand.game.offline', $.getGame($.channelName)));
+            } else {
+                message = $.replace(message, '(gameinfo)', $.lang.get('streamcommand.game.online', $.getGame($.channelName), $.getPlayTime()));
+            }
+        }
+
+        if (message.match(/\(titleinfo\)/)) {
+            if ($.getStatus($.channelName) == ' ' || $.getStatus($.channelName) == '') {
+                message = $.replace(message, '(titleinfo)', $.lang.get('streamcommand.title.no.title'));
+            } else if (!$.isOnline($.channelName)) {
+                message = $.replace(message, '(titleinfo)', $.lang.get('streamcommand.title.offline', $.getStatus($.channelName)));
+            } else {
+                message = $.replace(message, '(titleinfo)', $.lang.get('streamcommand.title.online', $.getStatus($.channelName), String($.getStreamUptime($.channelName))));
+            }
+        }
+
+        if (message.match(/\(followage\)/g)) {
+            var args = event.getArgs(),
+                channel = $.channelName,
+                sender = event.getSender();
+
+            if (args.length > 0) sender = args[0].replace('@','');
+            if (args.length > 1) channel = args[1].replace('@','');
+
+            $.getFollowAge(event.getSender(), sender, channel);
+            return null;
+        }
+
+        if (message.match(/\(playtime\)/g)) {
+            if (!$.isOnline($.channelName)) {
+                $.say($.userPrefix(event.getSender(), true) + $.lang.get('timesystem.uptime.offline', $.channelName));
+                return null;
+            }
+            message = $.replace(message, '(playtime)', ($.getPlayTime() ? $.getPlayTime() : ''));
+        }
+
+        if (message.match(/\(uptime\)/g)) {
+            if (!$.isOnline($.channelName)) {
+                $.say($.userPrefix(event.getSender(), true) + $.lang.get('timesystem.uptime.offline', $.channelName));
+                return null;
+            }
+            message = $.replace(message, '(uptime)', String($.getStreamUptime($.channelName)));
+        }
+
+        if (message.match(/\(lasttip\)/g)) {
+            message = $.replace(message, '(lasttip)', ($.inidb.exists('donations', 'last_donation_message') ? $.inidb.get('donations', 'last_donation_message') : 'No donations found.'));
+        }
+
+        if (message.match(/\(playsound\s([a-zA-Z1-9_]+)\)/g)) {
+            if (!$.audioHookExists(message.match(/\(playsound\s([a-zA-Z1-9_]+)\)/)[1])) {
+                $.log.error('Could not play audio hook: Audio hook does not exist.');
+                return null;
+            }
+            $.panelsocketserver.triggerAudioPanel(message.match(/\(playsound\s([a-zA-Z1-9_]+)\)/)[1]);
+            message = $.replace(message, message.match(/\(playsound\s([a-zA-Z1-9_]+)\)/)[0], '');
+            if (message == '') {
+                return null;
+            }
+        }
+
+        if (message.match(/\(age\)/g)) {
+            $.getChannelAge(event);
+            return null;
+        }
+
+        if (message.match(/\(writefile .+\)/)) {
+            if (message.match(/\(writefile (.+), (.+), (.+)\)/)) {
+                var file = message.match(/\(writefile (.+), (.+), (.+)\)/)[1],
+                    append = (message.match(/\(writefile (.+), (.+), (.+)\)/)[2] == 'true' ? true : false),
+                    string = message.match(/\(writefile (.+), (.+), (.+)\)/)[3];
+                $.writeToFile(string, './addons/' + file, append);
+            }
+            message = $.replace(message, message.match(/\(writefile (.+), (.+), (.+)\)/)[0], '');
+            if (message == '') {
+                return null;
+            }
+        }
+
+        if (message.match(/\(encodeurl ([\w\W]+)\)/)) {
+            var m = message.match(/\(encodeurl ([\w\W]+)\)/);
+            message = $.replace(message, m[0], encodeURI(m[1]));
+        }
+
+        // Variables for Twitch teams.
+        if (message.match(/\(team_.*/)) {
+            message = handleTwitchTeamVariables(message);
+        }
+
+        if (message.match(reCustomAPIJson) || message.match(reCustomAPI) || message.match(reCommandTag)) {
+            message = apiTags(event, message);
+        }
+
+        if (message.match('\n')) {
+            var splitMessage = message.split('\n');
+
+            for (var i = 0; i < splitMessage.length && i <= 4; ++i) {
+                $.say(splitMessage[i]);
+            }
+            return null;
+        }
+
+        return message;
+    }
+
+    /*
+     * @function handleTwitchTeamVariables Handles the twitch team tags.
+     *
+     * @return String
+     */
+    function handleTwitchTeamVariables(message) {
+        if (message.match(/\(team_members ([a-zA-Z0-9-_]+)\)/)) {
+            var teamMatch = message.match(/\(team_members ([a-zA-Z0-9-_]+)\)/),
+                teamName = teamMatch[1],
+                teamObj = $.twitchteamscache.getTeam(teamName);
+
+            if (teamObj != null) {
+                message = $.replace(message, teamMatch[0], teamObj.getTotalMembers());
+            } else {
+                message = $.replace(message, teamMatch[0], 'API_ERROR: You\'re not in that team.');
+            }
+        }
+
+        if (message.match(/\(team_url ([a-zA-Z0-9-_]+)\)/)) {
+            var teamMatch = message.match(/\(team_url ([a-zA-Z0-9-_]+)\)/),
+                teamName = teamMatch[1],
+                teamObj = $.twitchteamscache.getTeam(teamName);
+
+            if (teamObj != null) {
+                message = $.replace(message, teamMatch[0], teamObj.getUrl());
+            } else {
+                message = $.replace(message, teamMatch[0], 'API_ERROR: You\'re not in that team.');
+            }
+        }
+
+        if (message.match(/\(team_name ([a-zA-Z0-9-_]+)\)/)) {
+            var teamMatch = message.match(/\(team_name ([a-zA-Z0-9-_]+)\)/),
+                teamName = teamMatch[1],
+                teamObj = $.twitchteamscache.getTeam(teamName);
+
+            if (teamObj != null) {
+                message = $.replace(message, teamMatch[0], teamObj.getName());
+            } else {
+                message = $.replace(message, teamMatch[0], 'API_ERROR: You\'re not in that team.');
+            }
+        }
+
+        if (message.match(/\(team_random_member ([a-zA-Z0-9-_]+)\)/)) {
+            var teamMatch = message.match(/\(team_random_member ([a-zA-Z0-9-_]+)\)/),
+                teamName = teamMatch[1],
+                teamObj = $.twitchteamscache.getTeam(teamName);
+
+            if (teamObj != null) {
+                message = $.replace(message, teamMatch[0], teamObj.getRandomMember());
+            } else {
+                message = $.replace(message, teamMatch[0], 'API_ERROR: You\'re not in that team.');
+            }
+        }
+
+        if (message.match(/\(team_member_game ([a-zA-Z0-9-_]+),\s([a-zA-Z0-9_]+)\)/)) {
+            var teamMatch = message.match(/\(team_member_game ([a-zA-Z0-9-_]+),\s([a-zA-Z0-9_]+)\)/),
+                teamName = teamMatch[1],
+                teamUser = teamMatch[2]
+                teamObj = $.twitchteamscache.getTeam(teamName),
+                teamMember = teamObj.getTeamMember(teamUser);
+
+            if (teamObj != null) {
+                if (teamMember != null) {
+                    message = $.replace(message, teamMatch[0], teamMember.getString('game'));
+                } else {
+                    message = $.replace(message, teamMatch[0], 'API_ERROR: That user is not in the team.');
+                }
+            } else {
+                message = $.replace(message, teamMatch[0], 'API_ERROR: You\'re not in that team.');
+            }
+        }
+
+        if (message.match(/\(team_member_followers ([a-zA-Z0-9-_]+),\s([a-zA-Z0-9_]+)\)/)) {
+            var teamMatch = message.match(/\(team_member_followers ([a-zA-Z0-9-_]+),\s([a-zA-Z0-9_]+)\)/),
+                teamName = teamMatch[1],
+                teamUser = teamMatch[2]
+                teamObj = $.twitchteamscache.getTeam(teamName),
+                teamMember = teamObj.getTeamMember(teamUser);
+
+            if (teamObj != null) {
+                if (teamMember != null) {
+                    message = $.replace(message, teamMatch[0], teamMember.get('followers'));
+                } else {
+                    message = $.replace(message, teamMatch[0], 'API_ERROR: That user is not in the team.');
+                }
+            } else {
+                message = $.replace(message, teamMatch[0], 'API_ERROR: You\'re not in that team.');
+            }
+        }
+
+        if (message.match(/\(team_member_url ([a-zA-Z0-9-_]+),\s([a-zA-Z0-9_]+)\)/)) {
+            var teamMatch = message.match(/\(team_member_url ([a-zA-Z0-9-_]+),\s([a-zA-Z0-9_]+)\)/),
+                teamName = teamMatch[1],
+                teamUser = teamMatch[2]
+                teamObj = $.twitchteamscache.getTeam(teamName),
+                teamMember = teamObj.getTeamMember(teamUser);
+
+            if (teamObj != null) {
+                if (teamMember != null) {
+                    message = $.replace(message, teamMatch[0], teamMember.getString('url'));
+                } else {
+                    message = $.replace(message, teamMatch[0], 'API_ERROR: That user is not in the team.');
+                }
+            } else {
+                message = $.replace(message, teamMatch[0], 'API_ERROR: You\'re not in that team.');
+            }
+        }
+
+        return message;
+    }
+
+    /*
+     * @function apiTags
+     *
+     * @export $
+     * @param {string} message
+     * @param {Object} event
+     * @returns {string}
+     */
+    function apiTags(event, message) {
+        var JSONObject = Packages.org.json.JSONObject,
+            JSONArray = Packages.org.json.JSONArray,
+            command = event.getCommand(),
+            args = event.getArgs(),
+            origCustomAPIResponse = '',
+            customAPIReturnString = '',
+            message = message + '',
+            customAPIResponse = '',
+            customJSONStringTag = '',
+            commandToExec = 0,
+            jsonObject,
+            regExCheck,
+            jsonItems,
+            jsonCheckList;
+
+        // Get the URL for a customapi, if applicable, and process $1 - $9.  See below about that.
+        if ((regExCheck = message.match(reCustomAPI))) {
+            if (regExCheck[1].indexOf('$1') != -1) {
+                for (var i = 1; i <= 9; i++) {
+                    if (regExCheck[1].indexOf('$' + i) != -1) {
+                        if (!args[i - 1]) {
+                            return $.lang.get('customcommands.customapi.404', command);
+                        }
+                        regExCheck[1] = regExCheck[1].replace('$' + i, args[i - 1]);
+                    } else {
+                        break;
+                    }
+                }
+            }
+            customAPIReturnString = getCustomAPIValue(regExCheck[1]);
+        }
+
+        // Design Note.  As of this comment, this parser only supports parsing out of objects, it does not
+        // support parsing of arrays, especially walking arrays.  If that needs to be done, please write
+        // a custom JavaScript.  We limit $1 - $9 as well; 10 or more arguments being passed by users to an
+        // API seems like overkill.  Even 9 does, to be honest.
+        if ((regExCheck = message.match(reCustomAPIJson))) {
+            if (regExCheck[1].indexOf('$1') != -1) {
+                for (var i = 1; i <= 9; i++) {
+                    if (regExCheck[1].indexOf('$' + i) != -1) {
+                        if (!args[i - 1]) {
+                            return $.lang.get('customcommands.customapi.404', command);
+                        }
+                        regExCheck[1] = regExCheck[1].replace('$' + i, args[i - 1]);
+                    } else {
+                        break;
+                    }
+                }
+            }
+            origCustomAPIResponse = getCustomAPIValue(regExCheck[1]);
+            jsonItems = regExCheck[2].split(' ');
+            for (var j = 0; j < jsonItems.length; j++) {
+                if (jsonItems[j].startsWith('{') && jsonItems[j].endsWith('}')) {
+                    customAPIReturnString += " " + jsonItems[j].match(reCustomAPITextTag)[1];
+                } else if (jsonItems[j].startsWith('{') && !jsonItems[j].endsWith('}')) {
+                    customJSONStringTag = '';
+                    while (!jsonItems[j].endsWith('}')) {
+                        customJSONStringTag += jsonItems[j++] + " ";
+                    }
+                    customJSONStringTag += jsonItems[j];
+                    customAPIReturnString += " " + customJSONStringTag.match(reCustomAPITextTag)[1];
+                } else {
+                    jsonCheckList = jsonItems[j].split('.');
+                    if (jsonCheckList.length == 1) {
+                        try {
+                            customAPIResponse = new JSONObject(origCustomAPIResponse).get(jsonCheckList[0]);
+                        } catch (ex) {
+                            $.log.error('Failed to get data from API: ' + ex.message);
+                            return $.lang.get('customcommands.customapijson.err', command);
+                        }
+                        customAPIReturnString += customAPIResponse;
+                    } else {
+                        for (var i = 0; i < jsonCheckList.length - 1; i++) {
+                            if (i == 0) {
+                                try {
+                                    jsonObject = new JSONObject(origCustomAPIResponse).get(jsonCheckList[i]);
+                                } catch (ex) {
+                                    $.log.error('Failed to get data from API: ' + ex.message);
+                                    return $.lang.get('customcommands.customapijson.err', command);
+                                }
+                            } else if (!isNaN(jsonCheckList[i + 1])) {
+                                try {
+                                    jsonObject = jsonObject.get(jsonCheckList[i]);
+                                } catch (ex) {
+                                    $.log.error('Failed to get data from API: ' + ex.message);
+                                    return $.lang.get('customcommands.customapijson.err', command);
+                                }
+                            } else {
+                                try {
+                                    jsonObject = jsonObject.get(jsonCheckList[i]);
+                                } catch (ex) {
+                                    $.log.error('Failed to get data from API: ' + ex.message);
+                                    return $.lang.get('customcommands.customapijson.err', command);
+                                }
+                            }
+                        }
+                        try {
+                            customAPIResponse = jsonObject.get(jsonCheckList[i]);
+                        } catch (ex) {
+                            $.log.error('Failed to get data from API: ' + ex.message);
+                            return $.lang.get('customcommands.customapijson.err', command);
+                        }
+                        customAPIReturnString += customAPIResponse;
+                    }
+                }
+            }
+        }
+
+        if (message.match(reCommandTag)) {
+            commandToExec = message.match(reCommandTag)[1];
+            if (commandToExec.length > 0) {
+                var EventBus = Packages.tv.phantombot.event.EventBus;
+                var CommandEvent = Packages.tv.phantombot.event.command.CommandEvent;
+                EventBus.instance().post(new CommandEvent(event.getSender(), commandToExec, message.replace(reCommandTag, '').substring(1)));
+                return null;
+            }
+        }
+
+        return message.replace(reCustomAPI, customAPIReturnString).replace(reCustomAPIJson, customAPIReturnString);
     }
 
     /*
