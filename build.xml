@@ -238,11 +238,7 @@
         <mkdir dir="${lib.dir}" />
         <echo level="info" message="staging lib folder into build dir." />
         <copy todir="${lib.dir}">
-            <fileset dir="${reference}">
-                <include name="*.jar" />
-                <exclude name="*sources.jar"/>
-                <exclude name="*javadoc.jar"/>
-            </fileset>
+            <fileset dir="./lib" />
         </copy>
         <echo level="info" message="staging resources folder into build dir." />
         <copy todir="${res.dir}">
