@@ -50,6 +50,7 @@ import java.nio.file.Paths;
 import java.nio.charset.Charset;
 import java.nio.file.StandardOpenOption;
 import java.net.ServerSocket;
+import java.net.URI;
 import java.security.SecureRandom;
 
 import java.text.SimpleDateFormat;
@@ -98,6 +99,7 @@ import tv.phantombot.ytplayer.YTWebSocketServer;
 import tv.phantombot.ytplayer.YTWebSocketSecureServer;
 import tv.phantombot.discord.DiscordAPI;
 import tv.phantombot.twitch.api.TwitchValidate;
+import tv.phantombot.songlist.SonglistWebSocketClient;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
@@ -133,6 +135,9 @@ public final class PhantomBot implements Listener {
     private String bindIP;
     private int ytSocketPort;
     private int panelSocketPort;
+
+    /* Spreadsheet Information */
+    private String spreadsheetId;
 
     /* SSL information */
     private String httpsPassword = "password";
@@ -200,6 +205,7 @@ public final class PhantomBot implements Listener {
     public static String twitchCacheReady = "false";
 
     /* Socket Servers */
+    private SonglistWebSocketClient songlistWebSocketClient;
     private YTWebSocketServer youtubeSocketServer;
     private YTWebSocketSecureServer youtubeSocketSecureServer;
     private PanelSocketServer panelSocketServer;
@@ -408,6 +414,9 @@ public final class PhantomBot implements Listener {
         this.musicEnabled = this.pbProperties.getProperty("musicenable", "true").equalsIgnoreCase("true");
         this.useHttps = this.pbProperties.getProperty("usehttps", "false").equalsIgnoreCase("true");
         this.testPanelServer = this.pbProperties.getProperty("testpanelserver", "false").equalsIgnoreCase("true");
+
+        /* Set songlist variables */
+        this.spreadsheetId = this.pbProperties.getProperty("spreadsheetid", "");
 
         /* Set the datastore variables */
         this.dataStoreType = this.pbProperties.getProperty("datastore", "");
@@ -843,6 +852,17 @@ public final class PhantomBot implements Listener {
                         youtubeSocketServer.start();
                         print("YouTubeSocketServer accepting connections on port: " + ytSocketPort);
                     }
+
+                    /* Start the songlist service */
+                    URI uri = new URI(
+                        useHttps ? "wss" : "ws", // scheme
+                        "//" + (bindIP.isEmpty() ? "localhost" : bindIP) + ":" + ytSocketPort, // authority
+                        ""
+                    );
+                    songlistWebSocketClient = new SonglistWebSocketClient(uri, this.spreadsheetId);
+                    songlistWebSocketClient.setConnectionLostTimeout(0);
+                    songlistWebSocketClient.connect();
+                    print(uri.toString());
                 }
 
                 if (useHttps) {
