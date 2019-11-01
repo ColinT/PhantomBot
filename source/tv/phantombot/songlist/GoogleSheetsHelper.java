@@ -21,7 +21,10 @@ import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.Permission;
 import com.google.api.services.sheets.v4.Sheets;
 import com.google.api.services.sheets.v4.SheetsScopes;
+import com.google.api.services.sheets.v4.model.BatchUpdateSpreadsheetRequest;
+import com.google.api.services.sheets.v4.model.BatchUpdateSpreadsheetResponse;
 import com.google.api.services.sheets.v4.model.ClearValuesRequest;
+import com.google.api.services.sheets.v4.model.Request;
 import com.google.api.services.sheets.v4.model.Spreadsheet;
 import com.google.api.services.sheets.v4.model.SpreadsheetProperties;
 import com.google.api.services.sheets.v4.model.UpdateValuesResponse;
@@ -139,6 +142,15 @@ public class GoogleSheetsHelper {
         UpdateValuesResponse response = service.spreadsheets().values()
             .update(this.spreadsheetId, valueRange.getRange(), valueRange)
             .setValueInputOption("USER_ENTERED")
+            .execute();
+
+        return response;
+    }
+
+    public BatchUpdateSpreadsheetResponse batchUpdate(List<Request> requests) throws GeneralSecurityException, IOException {
+        Sheets service = GoogleSheetsHelper.getSheetService();
+        BatchUpdateSpreadsheetResponse response = service.spreadsheets()
+            .batchUpdate(this.spreadsheetId, new BatchUpdateSpreadsheetRequest().setRequests(requests))
             .execute();
 
         return response;

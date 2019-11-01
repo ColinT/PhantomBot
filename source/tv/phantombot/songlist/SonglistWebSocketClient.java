@@ -5,9 +5,20 @@ import java.net.URI;
 import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import com.gmt2001.datastore.DataStore;
+import com.google.api.services.sheets.v4.model.CellData;
+import com.google.api.services.sheets.v4.model.CellFormat;
+import com.google.api.services.sheets.v4.model.GridProperties;
+import com.google.api.services.sheets.v4.model.GridRange;
+import com.google.api.services.sheets.v4.model.RepeatCellRequest;
+import com.google.api.services.sheets.v4.model.Request;
+import com.google.api.services.sheets.v4.model.SheetProperties;
+import com.google.api.services.sheets.v4.model.TextFormat;
+import com.google.api.services.sheets.v4.model.UpdateSheetPropertiesRequest;
 import com.google.api.services.sheets.v4.model.ValueRange;
 
 import org.json.JSONArray;
@@ -77,18 +88,55 @@ public class SonglistWebSocketClient extends WebSocketClient {
             JSONArray array = obj.getJSONArray("songlist");
             
             // Clear the spreadsheet
-            this.googleSheetsHelper.clearRange("Sheet1!A2:D1000");
+            this.googleSheetsHelper.clearRange("Sheet1!A2:E1000");
+
+            // Format header row
+            Request textFormatRequest = new Request().setRepeatCell(new RepeatCellRequest()
+                .setCell(new CellData().setUserEnteredFormat(new CellFormat()
+                    .setHorizontalAlignment("CENTER")
+                    .setTextFormat(new TextFormat()
+                        .setBold(true)
+                    )
+                ))
+                .setRange(new GridRange()
+                    .setSheetId(0)
+                    .setStartRowIndex(0).setEndRowIndex(1)
+                    .setStartColumnIndex(0).setEndColumnIndex(5)
+                )
+                .setFields("userEnteredFormat.horizontalAlignment, userEnteredFormat.textFormat.bold")
+            );
+            Request freezeRowRequest = new Request().setUpdateSheetProperties(new UpdateSheetPropertiesRequest()
+                .setProperties(new SheetProperties()
+                    .setSheetId(0)
+                    .setGridProperties(new GridProperties()
+                        .setFrozenRowCount(1)
+                    )
+                )
+                .setFields("gridProperties.frozenRowCount")
+            );
+            this.googleSheetsHelper.batchUpdate(Arrays.asList(new Request[] {textFormatRequest, freezeRowRequest}));
+
+            // Set the header row
+            ValueRange headerValueRange = new ValueRange();
+            List<List<Object>> headerValues = new ArrayList<List<Object>>();
+            headerValueRange.setRange("Sheet1!A1:E1");
+            ArrayList<Object> headerRow = new ArrayList<Object>();
+            headerRow.addAll(Arrays.asList("Queue #", "Song Title", "Duration", "Requester", "Youtube ID"));
+            headerValues.add(headerRow);
+            headerValueRange.setValues(headerValues);
+            this.googleSheetsHelper.writeRange(headerValueRange);
 
             // Only write values if there are values to write
             if (array.length() > 0) {
                 // Construct value range to write to sheet
                 ValueRange valueRange = new ValueRange();
-                valueRange.setRange("Sheet1!A2:D" + array.length() + 1);
+                valueRange.setRange("Sheet1!A2:E" + array.length() + 1);
 
                 List<List<Object>> values = new ArrayList<List<Object>>();
                 for (int i = 0; i < array.length(); i++) {
                     ArrayList<Object> row = new ArrayList<Object>();
                     JSONObject rowObj = array.getJSONObject(i);
+                    row.add((i + 1) + "");
                     row.add(rowObj.getString("title"));
                     row.add(rowObj.getString("duration"));
                     row.add(rowObj.getString("requester"));
