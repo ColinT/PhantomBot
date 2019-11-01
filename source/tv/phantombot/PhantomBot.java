@@ -136,9 +136,6 @@ public final class PhantomBot implements Listener {
     private int ytSocketPort;
     private int panelSocketPort;
 
-    /* Spreadsheet Information */
-    private String spreadsheetId;
-
     /* SSL information */
     private String httpsPassword = "password";
     private String httpsFileName = "cert.jks";
@@ -414,9 +411,6 @@ public final class PhantomBot implements Listener {
         this.musicEnabled = this.pbProperties.getProperty("musicenable", "true").equalsIgnoreCase("true");
         this.useHttps = this.pbProperties.getProperty("usehttps", "false").equalsIgnoreCase("true");
         this.testPanelServer = this.pbProperties.getProperty("testpanelserver", "false").equalsIgnoreCase("true");
-
-        /* Set songlist variables */
-        this.spreadsheetId = this.pbProperties.getProperty("spreadsheetid", "");
 
         /* Set the datastore variables */
         this.dataStoreType = this.pbProperties.getProperty("datastore", "");
@@ -859,10 +853,13 @@ public final class PhantomBot implements Listener {
                         "//" + (bindIP.isEmpty() ? "localhost" : bindIP) + ":" + ytSocketPort, // authority
                         ""
                     );
-                    songlistWebSocketClient = new SonglistWebSocketClient(uri, this.spreadsheetId);
-                    songlistWebSocketClient.setConnectionLostTimeout(0);
-                    songlistWebSocketClient.connect();
-                    print(uri.toString());
+                    try {
+                        songlistWebSocketClient = new SonglistWebSocketClient(uri, dataStore);
+                        songlistWebSocketClient.setConnectionLostTimeout(0);
+                        songlistWebSocketClient.connect();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
 
                 if (useHttps) {

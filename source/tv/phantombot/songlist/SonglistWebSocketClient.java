@@ -7,6 +7,7 @@ import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.gmt2001.datastore.DataStore;
 import com.google.api.services.sheets.v4.model.ValueRange;
 
 import org.json.JSONArray;
@@ -18,17 +19,23 @@ import org.java_websocket.handshake.ServerHandshake;
 
 public class SonglistWebSocketClient extends WebSocketClient {
 
-    private GoogleSheetsHelper googleSheetsHelper;
+    public static final String DATABASE_TABLE_NAME = "spreadsheetsSonglist";
 
-    public SonglistWebSocketClient(URI serverURI, String sheetId) {
+    private GoogleSheetsHelper googleSheetsHelper;
+    private String spreadsheetId;
+
+    public SonglistWebSocketClient(URI serverURI, DataStore dataStore) throws GeneralSecurityException, IOException {
         super(serverURI);
-        com.gmt2001.Console.out.println("sheetId: " + sheetId);
-        this.googleSheetsHelper = new GoogleSheetsHelper(sheetId);
+        GoogleSheetsHelper.checkAuthentication();
+        this.spreadsheetId = this.loadSpreadsheetId(dataStore);
+        this.googleSheetsHelper = new GoogleSheetsHelper(this.spreadsheetId);
+        com.gmt2001.Console.out.println("spreadsheetId: " + this.spreadsheetId);
+        com.gmt2001.Console.out.println("Access the songlist at: " + this.getSpreadsheetUri());
     }
 
     @Override
     public void onOpen(ServerHandshake serverHandshake) {
-        com.gmt2001.Console.out.println("Connection established!");
+        com.gmt2001.Console.out.println("Songlist socket connected!");
     }
 
     @Override
@@ -44,6 +51,10 @@ public class SonglistWebSocketClient extends WebSocketClient {
             parseJSONObject(message);
         } catch (Exception e) {
             com.gmt2001.Console.out.println("Error parsing string as JSON: " + e);
+            StackTraceElement[] stackTrace = e.getStackTrace();
+            for (StackTraceElement stackElement : stackTrace) {
+                com.gmt2001.Console.out.println(stackElement.toString());
+            }
         }
         
     }
@@ -64,11 +75,6 @@ public class SonglistWebSocketClient extends WebSocketClient {
 
         if (obj.has("songlist")) {
             JSONArray array = obj.getJSONArray("songlist");
-            com.gmt2001.Console.out.println("songlist received: length " + array.length());
-            for (int i = 0; i < array.length(); i++) {
-                array.getJSONObject(i); // Force blocking operation
-                com.gmt2001.Console.out.println(array.getJSONObject(i));
-            }
             
             // Clear the spreadsheet
             this.googleSheetsHelper.clearRange("Sheet1!A2:D1000");
@@ -97,6 +103,25 @@ public class SonglistWebSocketClient extends WebSocketClient {
             }
             
         }
+    }
+
+    private String loadSpreadsheetId(DataStore dataStore) throws GeneralSecurityException, IOException {
+        // Check if a sheet id already exists
+        com.gmt2001.Console.out.println("haskey: " + dataStore.HasKey(SonglistWebSocketClient.DATABASE_TABLE_NAME, "", "spreadsheetId"));
+        com.gmt2001.Console.out.println("value: " + dataStore.GetString(SonglistWebSocketClient.DATABASE_TABLE_NAME, "", "spreadsheetId"));
+
+        if (dataStore.HasKey(SonglistWebSocketClient.DATABASE_TABLE_NAME, "", "spreadsheetId")) {
+            return dataStore.GetString(SonglistWebSocketClient.DATABASE_TABLE_NAME, "", "spreadsheetId");
+        } else {
+            // Create a new sheet
+            String spreadsheetId = GoogleSheetsHelper.createSheet();
+            dataStore.SetString(SonglistWebSocketClient.DATABASE_TABLE_NAME, "", "spreadsheetId", spreadsheetId);
+            return spreadsheetId;
+        }
+    }
+
+    public String getSpreadsheetUri() {
+        return "https://docs.google.com/spreadsheets/d/" + this.spreadsheetId + "/pubhtml";
     }
 
 }
