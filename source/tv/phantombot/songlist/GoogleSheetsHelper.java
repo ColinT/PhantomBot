@@ -24,9 +24,13 @@ import com.google.api.services.sheets.v4.SheetsScopes;
 import com.google.api.services.sheets.v4.model.BatchUpdateSpreadsheetRequest;
 import com.google.api.services.sheets.v4.model.BatchUpdateSpreadsheetResponse;
 import com.google.api.services.sheets.v4.model.ClearValuesRequest;
+import com.google.api.services.sheets.v4.model.GridProperties;
+import com.google.api.services.sheets.v4.model.GridRange;
 import com.google.api.services.sheets.v4.model.Request;
+import com.google.api.services.sheets.v4.model.SheetProperties;
 import com.google.api.services.sheets.v4.model.Spreadsheet;
 import com.google.api.services.sheets.v4.model.SpreadsheetProperties;
+import com.google.api.services.sheets.v4.model.UpdateSheetPropertiesRequest;
 import com.google.api.services.sheets.v4.model.UpdateValuesResponse;
 import com.google.api.services.sheets.v4.model.ValueRange;
 
@@ -145,6 +149,23 @@ public class GoogleSheetsHelper {
             .execute();
 
         return response;
+    }
+
+    public static Request createFreezeRowRequest(int frozenRowCount) {
+        return new Request().setUpdateSheetProperties(new UpdateSheetPropertiesRequest()
+            .setProperties(new SheetProperties()
+                .setSheetId(0)
+                .setGridProperties(new GridProperties()
+                    .setFrozenRowCount(frozenRowCount)
+                )
+            )
+            .setFields("gridProperties.frozenRowCount")
+        );
+    }
+
+    public GridRange createGridRangeFromA1(String a1String) {
+        
+        return new GridRange();
     }
 
     public BatchUpdateSpreadsheetResponse batchUpdate(List<Request> requests) throws GeneralSecurityException, IOException {

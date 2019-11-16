@@ -6,19 +6,15 @@ import java.nio.ByteBuffer;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import com.gmt2001.datastore.DataStore;
 import com.google.api.services.sheets.v4.model.CellData;
 import com.google.api.services.sheets.v4.model.CellFormat;
-import com.google.api.services.sheets.v4.model.GridProperties;
 import com.google.api.services.sheets.v4.model.GridRange;
 import com.google.api.services.sheets.v4.model.RepeatCellRequest;
 import com.google.api.services.sheets.v4.model.Request;
-import com.google.api.services.sheets.v4.model.SheetProperties;
 import com.google.api.services.sheets.v4.model.TextFormat;
-import com.google.api.services.sheets.v4.model.UpdateSheetPropertiesRequest;
 import com.google.api.services.sheets.v4.model.ValueRange;
 
 import org.json.JSONArray;
@@ -105,15 +101,7 @@ public class SonglistWebSocketClient extends WebSocketClient {
                 )
                 .setFields("userEnteredFormat.horizontalAlignment, userEnteredFormat.textFormat.bold")
             );
-            Request freezeRowRequest = new Request().setUpdateSheetProperties(new UpdateSheetPropertiesRequest()
-                .setProperties(new SheetProperties()
-                    .setSheetId(0)
-                    .setGridProperties(new GridProperties()
-                        .setFrozenRowCount(1)
-                    )
-                )
-                .setFields("gridProperties.frozenRowCount")
-            );
+            Request freezeRowRequest = GoogleSheetsHelper.createFreezeRowRequest(1);
             this.googleSheetsHelper.batchUpdate(Arrays.asList(new Request[] {textFormatRequest, freezeRowRequest}));
 
             // Set the header row
@@ -137,7 +125,7 @@ public class SonglistWebSocketClient extends WebSocketClient {
                     ArrayList<Object> row = new ArrayList<Object>();
                     JSONObject rowObj = array.getJSONObject(i);
                     row.add((i + 1) + "");
-                    row.add(rowObj.getString("title"));
+                    row.add("=HYPERLINK(\"https://www.youtube.com/watch?v=" + rowObj.getString("song") + "\", \"" + rowObj.getString("title") + "\")");
                     row.add(rowObj.getString("duration"));
                     row.add(rowObj.getString("requester"));
                     row.add(rowObj.getString("song"));
@@ -169,7 +157,7 @@ public class SonglistWebSocketClient extends WebSocketClient {
     }
 
     public String getSpreadsheetUri() {
-        return "https://docs.google.com/spreadsheets/d/" + this.spreadsheetId + "/pubhtml";
+        return "https://docs.google.com/spreadsheets/d/" + this.spreadsheetId;
     }
 
 }
