@@ -25,7 +25,6 @@ import com.google.api.services.sheets.v4.model.BatchUpdateSpreadsheetRequest;
 import com.google.api.services.sheets.v4.model.BatchUpdateSpreadsheetResponse;
 import com.google.api.services.sheets.v4.model.ClearValuesRequest;
 import com.google.api.services.sheets.v4.model.GridProperties;
-import com.google.api.services.sheets.v4.model.GridRange;
 import com.google.api.services.sheets.v4.model.Request;
 import com.google.api.services.sheets.v4.model.SheetProperties;
 import com.google.api.services.sheets.v4.model.Spreadsheet;
@@ -45,13 +44,26 @@ public class GoogleSheetsHelper {
     /** The Google spreadsheet id to write to */
     private String spreadsheetId;
 
+    /**
+     * @param spreadsheetId The id of the spreadsheet that this helper will perform operations on.
+     */
     public GoogleSheetsHelper(String spreadsheetId) {
         this.spreadsheetId = spreadsheetId;
     }
 
+    /**
+     * Creates a Google sheet with the title "Songlist".
+     * @return The id of the created sheet.
+     */
     public static String createSheet() throws GeneralSecurityException, IOException {
         return GoogleSheetsHelper.createSheet("Songlist");
     }
+
+    /**
+     * Creates a Google sheet with the specified title.
+     * @param title The title to name the created sheet.
+     * @return The id of the created sheet.
+     */
     public static String createSheet(String title) throws GeneralSecurityException, IOException {
         Sheets sheetService = GoogleSheetsHelper.getSheetService();
         Spreadsheet spreadsheet = sheetService.spreadsheets().create(
@@ -104,7 +116,11 @@ public class GoogleSheetsHelper {
         return auth;
     }
 
-    public static boolean checkAuthentication() {
+    /**
+     * Returns whether or not this client is authenticated properly.
+     * @return Whether or not this client is authenticated properly.
+     */
+    public static boolean isAuthenticated() {
         try {
             final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
             GoogleSheetsHelper.getCredentials(HTTP_TRANSPORT);
@@ -114,6 +130,10 @@ public class GoogleSheetsHelper {
         }
     }
 
+    /**
+     * Returns the Google drive service for this client.
+     * @return The Google drive service for this client.
+     */
     public static Drive getDriveService() throws GeneralSecurityException, IOException {
         final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
         Drive service = new Drive.Builder(HTTP_TRANSPORT, GoogleSheetsHelper.JSON_FACTORY, GoogleSheetsHelper.getCredentials(HTTP_TRANSPORT))
@@ -123,6 +143,10 @@ public class GoogleSheetsHelper {
         return service;
     }
 
+    /**
+     * Returns the Google sheet service for this client.
+     * @return The Google sheet service for this client.
+     */
     public static Sheets getSheetService() throws GeneralSecurityException, IOException {
         final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
         Sheets service = new Sheets.Builder(HTTP_TRANSPORT, GoogleSheetsHelper.JSON_FACTORY, GoogleSheetsHelper.getCredentials(HTTP_TRANSPORT))
@@ -132,6 +156,11 @@ public class GoogleSheetsHelper {
         return service;
     }
 
+    /**
+     * Executes a read range operation on the specified A1 format range.
+     * @param range A1 formatted range to read values from.
+     * @return The response of the read range operation.
+     */
     public ValueRange readRange(String range) throws GeneralSecurityException, IOException {
         Sheets service = GoogleSheetsHelper.getSheetService();
         ValueRange response = service.spreadsheets().values()
@@ -141,6 +170,11 @@ public class GoogleSheetsHelper {
         return response;
     }
 
+    /**
+     * Executes a write range operation on the specified value range.
+     * @param valueRange The value range of values to write.
+     * @return The response of the write range operation.
+     */
     public UpdateValuesResponse writeRange(ValueRange valueRange) throws GeneralSecurityException, IOException {
         Sheets service = GoogleSheetsHelper.getSheetService();
         UpdateValuesResponse response = service.spreadsheets().values()
@@ -151,6 +185,21 @@ public class GoogleSheetsHelper {
         return response;
     }
 
+    /**
+     * Executes a clear range operation on the apecified A1 format range.
+     * @param range A1 formatted range to delete values from.
+     * @return The response of the clear range operation.
+     */
+    public void clearRange(String range) throws GeneralSecurityException, IOException {
+        Sheets service = GoogleSheetsHelper.getSheetService();
+        service.spreadsheets().values().clear(this.spreadsheetId, range, new ClearValuesRequest()).execute();
+    }
+
+    /**
+     * Creates a freeze row request with the specified number of rows to freeze.
+     * @param frozenRowCount The number of rows to freeze
+     * @return A request to freeze the specified number of rows.
+     */
     public static Request createFreezeRowRequest(int frozenRowCount) {
         return new Request().setUpdateSheetProperties(new UpdateSheetPropertiesRequest()
             .setProperties(new SheetProperties()
@@ -163,11 +212,11 @@ public class GoogleSheetsHelper {
         );
     }
 
-    public GridRange createGridRangeFromA1(String a1String) {
-        
-        return new GridRange();
-    }
-
+    /**
+     * Executes a batch update request.
+     * @param requests The requests to execute.
+     * @return The response of the request.
+     */
     public BatchUpdateSpreadsheetResponse batchUpdate(List<Request> requests) throws GeneralSecurityException, IOException {
         Sheets service = GoogleSheetsHelper.getSheetService();
         BatchUpdateSpreadsheetResponse response = service.spreadsheets()
@@ -175,11 +224,6 @@ public class GoogleSheetsHelper {
             .execute();
 
         return response;
-    }
-
-    public void clearRange(String range) throws GeneralSecurityException, IOException {
-        Sheets service = GoogleSheetsHelper.getSheetService();
-        service.spreadsheets().values().clear(this.spreadsheetId, range, new ClearValuesRequest()).execute();
     }
 
 }
