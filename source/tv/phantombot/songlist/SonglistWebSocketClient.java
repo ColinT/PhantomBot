@@ -12,6 +12,7 @@ import com.gmt2001.datastore.DataStore;
 import com.google.api.services.sheets.v4.model.CellData;
 import com.google.api.services.sheets.v4.model.CellFormat;
 import com.google.api.services.sheets.v4.model.GridRange;
+import com.google.api.services.sheets.v4.model.MergeCellsRequest;
 import com.google.api.services.sheets.v4.model.RepeatCellRequest;
 import com.google.api.services.sheets.v4.model.Request;
 import com.google.api.services.sheets.v4.model.TextFormat;
@@ -20,7 +21,6 @@ import com.google.api.services.sheets.v4.model.ValueRange;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
@@ -55,7 +55,7 @@ public class SonglistWebSocketClient extends WebSocketClient {
         // com.gmt2001.Console.out.println("String: " + message);
 
         try {
-            parseJSONObject(message);
+            handleMessage(message);
         } catch (Exception e) {
             com.gmt2001.Console.out.println("Error parsing string as JSON: " + e);
             StackTraceElement[] stackTrace = e.getStackTrace();
@@ -77,14 +77,14 @@ public class SonglistWebSocketClient extends WebSocketClient {
         com.gmt2001.Console.out.println("Error: " + e);
     }
 
-    private void parseJSONObject(String input) throws GeneralSecurityException, IOException, JSONException {
+    private void handleMessage(String input) throws GeneralSecurityException, IOException, JSONException {
         JSONObject obj = new JSONObject(input);
 
         if (obj.has("songlist")) {
             JSONArray array = obj.getJSONArray("songlist");
             
             // Clear the spreadsheet
-            this.googleSheetsHelper.clearRange("Sheet1!A2:E1000");
+            this.googleSheetsHelper.clearRange("Sheet1!A3:E1000");
 
             // Format header row
             Request textFormatRequest = new Request().setRepeatCell(new RepeatCellRequest()
@@ -96,13 +96,18 @@ public class SonglistWebSocketClient extends WebSocketClient {
                 ))
                 .setRange(new GridRange()
                     .setSheetId(0)
-                    .setStartRowIndex(0).setEndRowIndex(1)
+                    .setStartRowIndex(2).setEndRowIndex(3)
                     .setStartColumnIndex(0).setEndColumnIndex(5)
                 )
                 .setFields("userEnteredFormat.horizontalAlignment, userEnteredFormat.textFormat.bold")
             );
             Request freezeRowRequest = GoogleSheetsHelper.createFreezeRowRequest(1);
-            this.googleSheetsHelper.batchUpdate(Arrays.asList(new Request[] {textFormatRequest, freezeRowRequest}));
+
+            // Submit all requests
+            this.googleSheetsHelper.batchUpdate(Arrays.asList(new Request[] {
+                textFormatRequest,
+                freezeRowRequest,
+            }));
 
             // Set the header row
             ValueRange headerValueRange = new ValueRange();
@@ -118,7 +123,7 @@ public class SonglistWebSocketClient extends WebSocketClient {
             if (array.length() > 0) {
                 // Construct value range to write to sheet
                 ValueRange valueRange = new ValueRange();
-                valueRange.setRange("Sheet1!A2:E" + array.length() + 1);
+                valueRange.setRange("Sheet1!A3:E" + array.length() + 3);
 
                 List<List<Object>> values = new ArrayList<List<Object>>();
                 for (int i = 0; i < array.length(); i++) {
@@ -138,14 +143,27 @@ public class SonglistWebSocketClient extends WebSocketClient {
                 this.googleSheetsHelper.writeRange(valueRange);
             }
             
+        } else if (obj.has("command")) {
+            JSONObject command = obj.getJSONObject("command");
+            if (command.has("play")) { // Update current song
+                ValueRange valueRange = new ValueRange();
+                valueRange.setRange("Sheet1!A2:E2");
+                List<List<Object>> values = new ArrayList<List<Object>>();
+                ArrayList<Object> row = new ArrayList<Object>();
+                row.add("Playing");
+                row.add("=HYPERLINK(\"https://www.youtube.com/watch?v=" + command.getString("play") + "\", \"" + command.getString("title") + "\")");
+                row.add(command.getString("duration"));
+                row.add(command.getString("requester"));
+                row.add(command.getString("play"));
+                values.add(row);
+                valueRange.setValues(values);
+                this.googleSheetsHelper.writeRange(valueRange);
+            }
         }
     }
 
     private String loadSpreadsheetId(DataStore dataStore) throws GeneralSecurityException, IOException {
         // Check if a sheet id already exists
-        com.gmt2001.Console.out.println("haskey: " + dataStore.HasKey(SonglistWebSocketClient.DATABASE_TABLE_NAME, "", "spreadsheetId"));
-        com.gmt2001.Console.out.println("value: " + dataStore.GetString(SonglistWebSocketClient.DATABASE_TABLE_NAME, "", "spreadsheetId"));
-
         if (dataStore.HasKey(SonglistWebSocketClient.DATABASE_TABLE_NAME, "", "spreadsheetId")) {
             return dataStore.GetString(SonglistWebSocketClient.DATABASE_TABLE_NAME, "", "spreadsheetId");
         } else {
