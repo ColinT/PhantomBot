@@ -12,7 +12,6 @@ import com.gmt2001.datastore.DataStore;
 import com.google.api.services.sheets.v4.model.CellData;
 import com.google.api.services.sheets.v4.model.CellFormat;
 import com.google.api.services.sheets.v4.model.GridRange;
-import com.google.api.services.sheets.v4.model.MergeCellsRequest;
 import com.google.api.services.sheets.v4.model.RepeatCellRequest;
 import com.google.api.services.sheets.v4.model.Request;
 import com.google.api.services.sheets.v4.model.TextFormat;
@@ -33,7 +32,6 @@ public class SonglistWebSocketClient extends WebSocketClient {
 
     public SonglistWebSocketClient(URI serverURI, DataStore dataStore) throws GeneralSecurityException, IOException {
         super(serverURI);
-        GoogleSheetsHelper.checkAuthentication();
         this.spreadsheetId = this.loadSpreadsheetId(dataStore);
         this.googleSheetsHelper = new GoogleSheetsHelper(this.spreadsheetId);
         com.gmt2001.Console.out.println("spreadsheetId: " + this.spreadsheetId);
