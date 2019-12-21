@@ -61,7 +61,7 @@ public class SonglistWebSocketClient extends WebSocketClient {
                 com.gmt2001.Console.out.println(stackElement.toString());
             }
         }
-        
+
     }
 
     @Override
@@ -80,32 +80,21 @@ public class SonglistWebSocketClient extends WebSocketClient {
 
         if (obj.has("songlist")) {
             JSONArray array = obj.getJSONArray("songlist");
-            
+
             // Clear the spreadsheet
             this.googleSheetsHelper.clearRange("Sheet1!A3:E1000");
 
             // Format header row
             Request textFormatRequest = new Request().setRepeatCell(new RepeatCellRequest()
-                .setCell(new CellData().setUserEnteredFormat(new CellFormat()
-                    .setHorizontalAlignment("CENTER")
-                    .setTextFormat(new TextFormat()
-                        .setBold(true)
-                    )
-                ))
-                .setRange(new GridRange()
-                    .setSheetId(0)
-                    .setStartRowIndex(2).setEndRowIndex(3)
-                    .setStartColumnIndex(0).setEndColumnIndex(5)
-                )
-                .setFields("userEnteredFormat.horizontalAlignment, userEnteredFormat.textFormat.bold")
-            );
+                    .setCell(new CellData().setUserEnteredFormat(new CellFormat().setHorizontalAlignment("CENTER")
+                            .setTextFormat(new TextFormat().setBold(true))))
+                    .setRange(new GridRange().setSheetId(0).setStartRowIndex(0).setEndRowIndex(1).setStartColumnIndex(0)
+                            .setEndColumnIndex(5))
+                    .setFields("userEnteredFormat.horizontalAlignment, userEnteredFormat.textFormat.bold"));
             Request freezeRowRequest = GoogleSheetsHelper.createFreezeRowRequest(1);
 
             // Submit all requests
-            this.googleSheetsHelper.batchUpdate(Arrays.asList(new Request[] {
-                textFormatRequest,
-                freezeRowRequest,
-            }));
+            this.googleSheetsHelper.batchUpdate(Arrays.asList(new Request[] { textFormatRequest, freezeRowRequest }));
 
             // Set the header row
             ValueRange headerValueRange = new ValueRange();
@@ -128,7 +117,8 @@ public class SonglistWebSocketClient extends WebSocketClient {
                     ArrayList<Object> row = new ArrayList<Object>();
                     JSONObject rowObj = array.getJSONObject(i);
                     row.add((i + 1) + "");
-                    row.add("=HYPERLINK(\"https://www.youtube.com/watch?v=" + rowObj.getString("song") + "\", \"" + rowObj.getString("title") + "\")");
+                    row.add("=HYPERLINK(\"https://www.youtube.com/watch?v=" + rowObj.getString("song") + "\", \""
+                            + rowObj.getString("title") + "\")");
                     row.add(rowObj.getString("duration"));
                     row.add(rowObj.getString("requester"));
                     row.add(rowObj.getString("song"));
@@ -140,7 +130,7 @@ public class SonglistWebSocketClient extends WebSocketClient {
 
                 this.googleSheetsHelper.writeRange(valueRange);
             }
-            
+
         } else if (obj.has("command")) {
             JSONObject command = obj.getJSONObject("command");
             if (command.has("play")) { // Update current song
@@ -149,7 +139,8 @@ public class SonglistWebSocketClient extends WebSocketClient {
                 List<List<Object>> values = new ArrayList<List<Object>>();
                 ArrayList<Object> row = new ArrayList<Object>();
                 row.add("Playing");
-                row.add("=HYPERLINK(\"https://www.youtube.com/watch?v=" + command.getString("play") + "\", \"" + command.getString("title") + "\")");
+                row.add("=HYPERLINK(\"https://www.youtube.com/watch?v=" + command.getString("play") + "\", \""
+                        + command.getString("title") + "\")");
                 row.add(command.getString("duration"));
                 row.add(command.getString("requester"));
                 row.add(command.getString("play"));
