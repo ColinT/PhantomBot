@@ -2089,15 +2089,15 @@
     });
 
     $.bind('initReady', function() {
-        $.registerChatCommand('./custom/youtubePlayer.js', 'ytp', 1);
-        $.registerChatCommand('./custom/youtubePlayer.js', 'musicplayer', 1);
-        $.registerChatCommand('./custom/youtubePlayer.js', 'playlist', 1);
+        $.registerChatCommand('./custom/youtubePlayer.js', 'ytp', 2);
+        $.registerChatCommand('./custom/youtubePlayer.js', 'musicplayer', 2);
+        $.registerChatCommand('./custom/youtubePlayer.js', 'playlist', 2);
         $.registerChatCommand('./custom/youtubePlayer.js', 'stealsong', 1);
-        $.registerChatCommand('./custom/youtubePlayer.js', 'jumptosong', 1);
-        $.registerChatCommand('./custom/youtubePlayer.js', 'findsong', 1);
-        $.registerChatCommand('./custom/youtubePlayer.js', 'playsong', 1);
-        $.registerChatCommand('./custom/youtubePlayer.js', 'skipsong', 1);
-        $.registerChatCommand('./custom/youtubePlayer.js', 'reloadyt', 1);
+        $.registerChatCommand('./custom/youtubePlayer.js', 'jumptosong', 2);
+        $.registerChatCommand('./custom/youtubePlayer.js', 'findsong', 2);
+        $.registerChatCommand('./custom/youtubePlayer.js', 'playsong', 2);
+        $.registerChatCommand('./custom/youtubePlayer.js', 'skipsong', 2);
+        $.registerChatCommand('./custom/youtubePlayer.js', 'reloadyt', 2);
         $.registerChatCommand('./custom/youtubePlayer.js', 'songrequest');
         $.registerChatCommand('./custom/youtubePlayer.js', 'addsong');
         $.registerChatCommand('./custom/youtubePlayer.js', 'previoussong');

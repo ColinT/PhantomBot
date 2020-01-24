@@ -64,7 +64,7 @@
         }
 
         // Get and set the command permission.
-        groupId = $.getSetIniDbNumber('permcom', command, groupId);
+        $.setIniDbNumber('permcom', command, groupId);
 
         commands[command] = {
             groupId: groupId,
