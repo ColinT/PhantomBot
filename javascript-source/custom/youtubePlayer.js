@@ -626,6 +626,15 @@
         };
 
         /**
+         * @function moveSong - Move song request from one position to another
+         * @param {String} sourceIndexString - Zero indexed source position
+         * @param {String} targetIndexString - Zero indexed target position
+         */
+        this.moveSong = function(sourceIndexString, targetIndexString) {
+
+        }
+
+        /**
          * @function findSongByTitle
          * @param String
          * @return (boolean}
@@ -1462,6 +1471,7 @@
                     const removedSongTitle = currentPlaylist.removeSongAtIndex(actionArgs[0]);
                     if (!!removedSongTitle) {
                         $.say($.whisperPrefix(sender) + $.lang.get('ytplayer.command.delrequestat.success', actionArgs[0], removedSongTitle));
+                        connectedPlayerClient.pushSongList();
                     } else {
                         $.say($.whisperPrefix(sender) + $.lang.get('ytplayer.command.delrequestat.404', actionArgs[0]));
                     }
@@ -1892,6 +1902,18 @@
             if (!currentPlaylist.jumpToSong(args[0])) {
                 $.say($.whisperPrefix(sender) + $.lang.get('ytplayer.command.jumptosong.failed', args[0]));
             }
+        }
+
+        /**
+         * @commandpath moverequest [source] [destination] - Move a song from one position to another position in the playlist. 
+         */
+        if (command.equalsIgnoreCase('moverequest')) {
+            if (args[0] === undefined || args[1] === undefined) {
+                $.say($.whisperPrefix(sender) + $.lang.get('ytplayer.command.moverequest.usage'));
+                return;
+            }
+
+
         }
 
         /**
