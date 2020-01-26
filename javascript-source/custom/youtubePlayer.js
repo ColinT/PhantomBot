@@ -792,6 +792,21 @@
         };
 
         /**
+         * @function removeSongAtIndex - Remove a song at the specified 0 indexed position
+         * @param {String} indexString
+         * @returns {String|undefined}
+         */
+        this.removeSongAtIndex = function(indexString) {
+            const index = parseInt(indexString, 10);
+            const requestsArray = requests.toArray();
+            if (!isNaN(index) && index >= 0 && index < requestsArray.length) {
+                const songTitle = requestsArray[index].getVideoTitle();
+                requests.remove(requestsArray[index]);
+                return songTitle;
+            }
+        }
+
+        /**
          * @function removeUserSong
          * @param {String}
          * @return {String}
@@ -1437,6 +1452,22 @@
                     $.say($.whisperPrefix(sender) + $.lang.get('ytplayer.command.delrequest.usage'));
                 }
                 return;
+            }
+
+            /**
+             * @commandpath ytp delrequestat [Zero Index] - Delete a song that has been requested at the given position 
+             */
+            if (action.equalsIgnoreCase('delrequestat')) {
+                if (actionArgs[0]) {
+                    const removedSongTitle = currentPlaylist.removeSongAtIndex(actionArgs[0]);
+                    if (!!removedSongTitle) {
+                        $.say($.whisperPrefix(sender) + $.lang.get('ytplayer.command.delrequestat.success', actionArgs[0], removedSongTitle));
+                    } else {
+                        $.say($.whisperPrefix(sender) + $.lang.get('ytplayer.command.delrequestat.404', actionArgs[0]));
+                    }
+                } else {
+                    $.say($.whisperPrefix(sender) + $.lang.get('ytplayer.command.delrequestat.usage'));
+                }
             }
 
             /**
