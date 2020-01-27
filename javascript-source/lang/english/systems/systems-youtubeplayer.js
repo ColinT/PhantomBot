@@ -89,7 +89,11 @@ $.lang.register('ytplayer.command.delrequest.usage', 'Usage: !ytp delrequest [Yo
 
 $.lang.register('ytplayer.command.delrequestat.success', 'Removed song at position [$1] and title of [$2] from song requests.');
 $.lang.register('ytplayer.command.delrequestat.404', 'Song requests do not have a song with an index of [$1].');
-$.lang.register('ytplayer.command.delrequestat.usage', 'Usage: !ytp delrequestat [0 index]');
+$.lang.register('ytplayer.command.delrequestat.usage', 'Usage: !ytp delrequestat [index]');
+
+$.lang.register('ytplayer.command.ytp.moverequest.usage', 'Usage: !ytp moverequest [source index] [target index]');
+
+$.lang.register('ytplayer.command.ytp.promoterequest.usage', 'Usage: !ytp promoterequest [index]');
 
 $.lang.register('ytplayer.command.ytp.clearcache.warning', 'This will remove all cached YouTube Player IDs. If you are sure, run !ytp clearcache now');
 $.lang.register('ytplayer.command.ytp.clearcache.success', 'YouTube Player ID cache has been cleared.');

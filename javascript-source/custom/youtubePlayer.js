@@ -629,9 +629,33 @@
          * @function moveSong - Move song request from one position to another
          * @param {String} sourceIndexString - Zero indexed source position
          * @param {String} targetIndexString - Zero indexed target position
+         * @returns {boolean}
          */
         this.moveSong = function(sourceIndexString, targetIndexString) {
-
+            const sourceIndex = parseInt(sourceIndexString);
+            const targetIndex = parseInt(targetIndexString);
+            const requestsArray = requests.toArray();
+            if (!isNaN(sourceIndex) && !isNaN(targetIndex)
+                && sourceIndex >= 0 && sourceIndex < requestsArray.length
+                && targetIndex >= 0 && targetIndex < requestsArray.length
+                && sourceIndex !== targetIndex) {
+                // Dequeue entire request queue and re-enqueue items in the new order [O(n) operation]
+                const sourceSong = requestsArray[sourceIndex];
+                requests.remove(sourceSong);
+                if (targetIndex === requestsArray.length - 1) { // If the song just needs to be moved to the end, use this [O(1)] shortcut
+                    requests.add(sourceSong);
+                } else {
+                    for (var i = 0; i < requestsArray.length; i++) {
+                        if (i === targetIndex) {
+                            requests.add(sourceSong);
+                        } else {
+                            requests.add(requests.poll());
+                        }
+                    }
+                }
+                return true;
+            }
+            return false;
         }
 
         /**
@@ -1468,15 +1492,37 @@
              */
             if (action.equalsIgnoreCase('delrequestat')) {
                 if (actionArgs[0]) {
-                    const removedSongTitle = currentPlaylist.removeSongAtIndex(actionArgs[0]);
-                    if (!!removedSongTitle) {
-                        $.say($.whisperPrefix(sender) + $.lang.get('ytplayer.command.delrequestat.success', actionArgs[0], removedSongTitle));
+                    const removedSongTitle2 = currentPlaylist.removeSongAtIndex(actionArgs[0]);
+                    if (!!removedSongTitle2) {
+                        $.say($.whisperPrefix(sender) + $.lang.get('ytplayer.command.delrequestat.success', actionArgs[0], removedSongTitle2));
                         connectedPlayerClient.pushSongList();
                     } else {
                         $.say($.whisperPrefix(sender) + $.lang.get('ytplayer.command.delrequestat.404', actionArgs[0]));
                     }
                 } else {
                     $.say($.whisperPrefix(sender) + $.lang.get('ytplayer.command.delrequestat.usage'));
+                }
+            }
+
+            /**
+             * @commandpath ytp moverequest [source] [destination] - Move a song from one position to another position in the queue. 
+             */
+            if (action.equalsIgnoreCase('moverequest')) {
+                if (actionArgs[0] === undefined || actionArgs[1] === undefined) {
+                    $.say($.whisperPrefix(sender) + $.lang.get('ytplayer.command.ytp.moverequest.usage'));
+                } else if (currentPlaylist.moveSong(actionArgs[0], actionArgs[1])) {
+                    connectedPlayerClient.pushSongList();
+                }
+            }
+
+            /**
+             * @commandpath ytp promoterequest [index] - Move a song to the top of the queue.
+             */
+            if (action.equalsIgnoreCase('promoterequest')) {
+                if (actionArgs[0] === undefined) {
+                    $.say($.whisperPrefix(sender) + $.lang.get('ytplayer.command.ytp.promoterequest.usage'));
+                } else if (currentPlaylist.moveSong(actionArgs[0], 0)) {
+                    connectedPlayerClient.pushSongList();
                 }
             }
 
@@ -1902,18 +1948,6 @@
             if (!currentPlaylist.jumpToSong(args[0])) {
                 $.say($.whisperPrefix(sender) + $.lang.get('ytplayer.command.jumptosong.failed', args[0]));
             }
-        }
-
-        /**
-         * @commandpath moverequest [source] [destination] - Move a song from one position to another position in the playlist. 
-         */
-        if (command.equalsIgnoreCase('moverequest')) {
-            if (args[0] === undefined || args[1] === undefined) {
-                $.say($.whisperPrefix(sender) + $.lang.get('ytplayer.command.moverequest.usage'));
-                return;
-            }
-
-
         }
 
         /**
