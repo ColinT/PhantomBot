@@ -1527,6 +1527,7 @@
                 if (actionArgs[0] === undefined || actionArgs[1] === undefined) {
                     $.say($.whisperPrefix(sender) + $.lang.get('ytplayer.command.ytp.moverequest.usage'));
                 } else if (currentPlaylist.moveSong(actionArgs[0] - indexingMode, actionArgs[1] - indexingMode)) {
+                    $.say($.whisperPrefix(sender) + $.lang.get('ytplayer.command.ytp.moverequest.success', actionArgs[0], actionArgs[1]));
                     connectedPlayerClient.pushSongList();
                 }
             }
@@ -1538,6 +1539,7 @@
                 if (actionArgs[0] === undefined) {
                     $.say($.whisperPrefix(sender) + $.lang.get('ytplayer.command.ytp.promoterequest.usage'));
                 } else if (currentPlaylist.moveSong(actionArgs[0] - indexingMode, 0)) {
+                    $.say($.whisperPrefix(sender) + $.lang.get('ytplayer.command.ytp.promoterequest.success', actionArgs[0]));
                     connectedPlayerClient.pushSongList();
                 }
             }
