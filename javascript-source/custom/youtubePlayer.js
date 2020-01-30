@@ -55,6 +55,9 @@
         /* @type {BotPlayList} */
         currentPlaylist = null;
 
+    /** Indexing mode for commands, either 0 indexing, or 1 indexing. */
+    var indexingMode = $.getSetIniDbNumber('ytSettings', 'indexingMode', 1);
+
     /**
      * @function reloadyt
      */
@@ -864,10 +867,10 @@
          * @param {string} requestOwner
          * @return {YoutubeVideo}
          */
-        this.requestSong = function(searchQuery, requestOwner) {
+        this.requestSong = function(searchQuery, requestOwner, requestOwnerTags) {
             var keys = $.inidb.GetKeyList('ytpBlacklistedSong', '');
-            if (!$.isAdmin(requestOwner) && (!songRequestsEnabled || this.senderReachedRequestMax(requestOwner))) {
-                if (this.senderReachedRequestMax(requestOwner)) {
+            if (!$.isAdmin(requestOwner) && (!songRequestsEnabled || this.senderReachedRequestMax(requestOwner, requestOwnerTags))) {
+                if (this.senderReachedRequestMax(requestOwner, requestOwnerTags)) {
                     requestFailReason = $.lang.get('ytplayer.requestsong.error.maxrequests');
                 } else {
                     requestFailReason = $.lang.get('ytplayer.requestsong.error.disabled');
@@ -913,7 +916,7 @@
          * @param {string} sender
          * @returns {boolean}
          */
-        this.senderReachedRequestMax = function(sender) {
+        this.senderReachedRequestMax = function(sender, tags) {
             var currentRequestCount = 0,
                 requestsArray = requests.toArray(),
                 i;
@@ -925,6 +928,19 @@
                     ++currentRequestCount;
                 }
             }
+
+            // if ($.isMod(sender)) {
+            //     return (currentRequestCount >= songRequestsMaxParallel + 3);
+            // }
+
+            // if ($.isVIP(sender, tags)) {
+            //     return (currentRequestCount >= songRequestsMaxParallel + 2);
+            // }
+
+            // if ($.isSubv3(sender, tags)) {
+            //     return (currentRequestCount >= songRequestsMaxParallel + 1);
+            // }
+
             return (currentRequestCount >= songRequestsMaxParallel);
         };
 
@@ -1488,11 +1504,11 @@
             }
 
             /**
-             * @commandpath ytp delrequestat [Zero Index] - Delete a song that has been requested at the given position 
+             * @commandpath ytp delrequestat [index] - Delete a song that has been requested at the given position 
              */
             if (action.equalsIgnoreCase('delrequestat')) {
                 if (actionArgs[0]) {
-                    const removedSongTitle2 = currentPlaylist.removeSongAtIndex(actionArgs[0]);
+                    const removedSongTitle2 = currentPlaylist.removeSongAtIndex(actionArgs[0] - indexingMode);
                     if (!!removedSongTitle2) {
                         $.say($.whisperPrefix(sender) + $.lang.get('ytplayer.command.delrequestat.success', actionArgs[0], removedSongTitle2));
                         connectedPlayerClient.pushSongList();
@@ -1510,7 +1526,7 @@
             if (action.equalsIgnoreCase('moverequest')) {
                 if (actionArgs[0] === undefined || actionArgs[1] === undefined) {
                     $.say($.whisperPrefix(sender) + $.lang.get('ytplayer.command.ytp.moverequest.usage'));
-                } else if (currentPlaylist.moveSong(actionArgs[0], actionArgs[1])) {
+                } else if (currentPlaylist.moveSong(actionArgs[0] - indexingMode, actionArgs[1] - indexingMode)) {
                     connectedPlayerClient.pushSongList();
                 }
             }
@@ -1521,7 +1537,7 @@
             if (action.equalsIgnoreCase('promoterequest')) {
                 if (actionArgs[0] === undefined) {
                     $.say($.whisperPrefix(sender) + $.lang.get('ytplayer.command.ytp.promoterequest.usage'));
-                } else if (currentPlaylist.moveSong(actionArgs[0], 0)) {
+                } else if (currentPlaylist.moveSong(actionArgs[0] - indexingMode, 0)) {
                     connectedPlayerClient.pushSongList();
                 }
             }
@@ -1732,6 +1748,21 @@
 
                     $.inidb.del('ytpBlacklistedSong', actionArgs.join(' ').trim().toLowerCase());
                     $.say($.whisperPrefix(sender) + $.lang.get('ytplayer.blacklist.remove.success.song', actionArgs.join(' ').trim()));
+                    return;
+                }
+            }
+
+            /**
+             * @commandpath ytp indexingmode [0 or 1] - Change command indexing mode between 0 and 1
+             */
+            if (action.equalsIgnoreCase('indexingmode')) {
+                if (!actionArgs[0] || isNaN(parseInt(actionArgs[0], 10) || (parseInt(actionArgs[0], 10) !== 0 && parseInt(actionArgs[0], 10) !== 1))) {
+                    $.say($.whisperPrefix(sender) + $.lang.get('ytplayer.command.ytp.indexingmode.usage'));
+                    return;
+                } else {
+                    indexingMode = actionArgs[0];
+                    $.setIniDbNumber('ytSettings', 'indexingMode', indexingMode);
+                    $.say($.lang.get('ytplayer.command.ytp.indexingmode.success', indexingMode));
                     return;
                 }
             }
@@ -2029,7 +2060,7 @@
                 return;
             }
 
-            var request = currentPlaylist.requestSong(event.getArguments(), sender);
+            var request = currentPlaylist.requestSong(event.getArguments(), sender, event.getTags());
             if (request != null) {
                 $.say($.whisperPrefix(sender) + $.lang.get('ytplayer.command.songrequest.success', request.getVideoTitle(), currentPlaylist.getRequestsCount(), request.getVideoId()));
                 connectedPlayerClient.pushSongList();
