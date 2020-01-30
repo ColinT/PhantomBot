@@ -138,6 +138,9 @@ $.lang.register('ytplayer.blacklist.remove.usage.song', 'Usage: !ytp blacklist r
 $.lang.register('ytplayer.blacklist.remove.success.song', 'Song/Keyword: "$1" has been removed from the blacklist.');
 $.lang.register('ytplayer.blacklist.404', 'Song name has been blacklisted.');
 
+$.lang.register('ytplayer.command.ytp.indexingmode.usage', 'Usage: !ytp indexingmode [0 or 1]');
+$.lang.register('ytplayer.command.ytp.indexingmode.success', 'Successfully changed indexing mode to $1');
+
 $.lang.register('ytplayer.command.skip.success', 'Skip requested! Current song will be skipped in $1 more votes.');
 $.lang.register('ytplayer.command.skip.disabled', 'The vote functionality is currently disabled.');
 $.lang.register('ytplayer.command.skip.failure', 'You have already requested a skip for the current song.');
