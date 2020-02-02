@@ -569,6 +569,24 @@ $(function() {
                 player.dbUpdate('max_song_up', 'ytSettings', 'songRequestsMaxParallel', String(maxSongs));
             }
 
+            // Update sub max songs.
+            let maxSubSongs = $('#max-song-sub').val();
+            if (parseInt(maxSubSongs, 10) > 0) {
+                player.dbUpdate('max_sub_song_up', 'ytSettings', 'songRequestsMaxParallelSub', String(maxSubSongs));
+            }
+
+            // Update vip max songs.
+            let maxVipSongs = $('#max-song-vip').val();
+            if (parseInt(maxVipSongs, 10) > 0) {
+                player.dbUpdate('max_vip_song_up', 'ytSettings', 'songRequestsMaxParallelVip', String(maxVipSongs));
+            }
+
+            // Update mod max songs.
+            let maxModSongs = $('#max-song-mod').val();
+            if (parseInt(maxModSongs, 10) > 0) {
+                player.dbUpdate('max_mod_song_up', 'ytSettings', 'songRequestsMaxParallelMod', String(maxModSongs));
+            }
+
             // Update max song length.
             let maxSongLen = $('#max-song-length').val();
             if (parseInt(maxSongLen) > 0) {

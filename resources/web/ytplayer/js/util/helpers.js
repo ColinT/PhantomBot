@@ -208,7 +208,48 @@ $(function() {
                 'class': 'form-control',
                 'id': 'max-song-user',
                 'value': e.songRequestsMaxParallel
-            }))).append($('<div/>', {
+            })))
+
+            .append($('<div/>', {
+                'class': 'form-group'
+            }).append($('<label/>', {
+                'text': 'Maximum Songs (Subscriber)'
+            })).append($('<input/>', {
+                'type': 'number',
+                'data-toggle': 'tooltip',
+                'title': 'How many songs a subscriber can have in the queue.',
+                'class': 'form-control',
+                'id': 'max-song-sub',
+                'value': e.songRequestsMaxParallelSub
+            })))
+
+            .append($('<div/>', {
+                'class': 'form-group'
+            }).append($('<label/>', {
+                'text': 'Maximum Songs (VIP)'
+            })).append($('<input/>', {
+                'type': 'number',
+                'data-toggle': 'tooltip',
+                'title': 'How many songs a VIP can have in the queue.',
+                'class': 'form-control',
+                'id': 'max-song-vip',
+                'value': e.songRequestsMaxParallelVip
+            })))
+
+            .append($('<div/>', {
+                'class': 'form-group'
+            }).append($('<label/>', {
+                'text': 'Maximum Songs (Moderator)'
+            })).append($('<input/>', {
+                'type': 'number',
+                'data-toggle': 'tooltip',
+                'title': 'How many songs a moderator can have in the queue.',
+                'class': 'form-control',
+                'id': 'max-song-mod',
+                'value': e.songRequestsMaxParallelMod
+            })))
+            
+            .append($('<div/>', {
                 'class': 'form-group'
             }).append($('<label/>', {
                 'text': 'Maximum Song Duration'

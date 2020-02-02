@@ -57,12 +57,21 @@
 
     /** Indexing mode for commands, either 0 indexing, or 1 indexing. */
     var indexingMode = $.getSetIniDbNumber('ytSettings', 'indexingMode', 1);
+    /** Maximum parallel song requests for subscribers. Only the highest value counts among all roles, including no role. */
+    var songRequestsMaxParallelSub = $.getSetIniDbNumber('ytSettings', 'songRequestsMaxParallelSub', -1);
+    /** Maximum parallel song requests for VIPs. Only the highest value counts among all roles, including no role. */
+    var songRequestsMaxParallelVip = $.getSetIniDbNumber('ytSettings', 'songRequestsMaxParallelVip', -1);
+    /** Maximum parallel song requests for moderators. Only the highest value counts among all roles, including no role. */
+    var songRequestsMaxParallelMod = $.getSetIniDbNumber('ytSettings', 'songRequestsMaxParallelMod', -1);
 
     /**
      * @function reloadyt
      */
     function reloadyt() {
         songRequestsMaxParallel = $.getIniDbNumber('ytSettings', 'songRequestsMaxParallel');
+        songRequestsMaxParallelSub = $.getIniDbNumber('ytSettings', 'songRequestsMaxParallelSub');
+        songRequestsMaxParallelVip = $.getIniDbNumber('ytSettings', 'songRequestsMaxParallelVip');
+        songRequestsMaxParallelMod = $.getIniDbNumber('ytSettings', 'songRequestsMaxParallelMod');
         songRequestsMaxSecondsforVideo = $.getIniDbNumber('ytSettings', 'songRequestsMaxSecondsforVideo');
         playlistDJname = $.getIniDbString('ytSettings', 'playlistDJname');
         announceInChat = $.getIniDbBoolean('ytSettings', 'announceInChat');
@@ -929,19 +938,21 @@
                 }
             }
 
-            // if ($.isMod(sender)) {
-            //     return (currentRequestCount >= songRequestsMaxParallel + 3);
-            // }
+            var allowedParallelSongRequests = songRequestsMaxParallel;
 
-            // if ($.isVIP(sender, tags)) {
-            //     return (currentRequestCount >= songRequestsMaxParallel + 2);
-            // }
+            if ($.isModv3(sender, tags)) {
+                allowedParallelSongRequests = Math.max(allowedParallelSongRequests, songRequestsMaxParallelMod);
+            }
 
-            // if ($.isSubv3(sender, tags)) {
-            //     return (currentRequestCount >= songRequestsMaxParallel + 1);
-            // }
+            if ($.isVIP(sender, tags)) {
+                allowedParallelSongRequests = Math.max(allowedParallelSongRequests, songRequestsMaxParallelVip);
+            }
 
-            return (currentRequestCount >= songRequestsMaxParallel);
+            if ($.isSubv3(sender, tags)) {
+                allowedParallelSongRequests = Math.max(allowedParallelSongRequests, songRequestsMaxParallelSub);
+            }
+
+            return (currentRequestCount >= allowedParallelSongRequests);
         };
 
         /**
@@ -1663,7 +1674,24 @@
              * @commandpath ytp limit [max concurrent requests] - Set the maximum of concurrent songrequests a user can make
              */
             if (action.equalsIgnoreCase('setrequestmax') || action.equalsIgnoreCase('limit')) {
-                if (!actionArgs[0] || isNaN(parseInt(actionArgs[0]))) {
+                if (!!actionArgs[0] && !!actionArgs[1]) {
+                    if (isNaN(parseInt(actionArgs[1], 10)) || (!actionArgs[0].equalsIgnoreCase('sub') && !actionArgs[0].equalsIgnoreCase('vip') && !actionArgs[0].equalsIgnoreCase('mod'))) {
+                        $.say($.whisperPrefix(sender) + $.lang.get('ytplayer.command.ytp.setrequestmax.role.usage'));
+                    } else {
+                        if (actionArgs[0].equalsIgnoreCase('sub')) {
+                            songRequestsMaxParallelSub = parseInt(actionArgs[1], 10);
+                            $.inidb.set('ytSettings', 'songRequestsMaxParallelSub', songRequestsMaxParallelSub);
+                        } else if (actionArgs[0].equalsIgnoreCase('vip')) {
+                            songRequestsMaxParallelVip = parseInt(actionArgs[1], 10);
+                            $.inidb.set('ytSettings', 'songRequestsMaxParallelVip', songRequestsMaxParallelVip);
+                        } else if (actionArgs[0].equalsIgnoreCase('mod')) {
+                            songRequestsMaxParallelMod = parseInt(actionArgs[1], 10);
+                            $.inidb.set('ytSettings', 'songRequestsMaxParallelMod', songRequestsMaxParallelMod);
+                        }
+                        $.say($.lang.get('ytplayer.command.ytp.setrequestmax.role.success', actionArgs[0], actionArgs[1])); 
+                    }
+                    return;
+                } else if (!actionArgs[0] || isNaN(parseInt(actionArgs[0]))) {
                     $.say($.whisperPrefix(sender) + $.lang.get('ytplayer.command.ytp.setrequestmax.usage'));
                     return;
                 }
