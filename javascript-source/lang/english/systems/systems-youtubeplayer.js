@@ -42,6 +42,8 @@ $.lang.register('ytplayer.command.ytp.toggleannounce.toggled', 'YouTube Player A
 
 $.lang.register('ytplayer.command.ytp.setrequestmax.usage', 'Usage: !ytp setrequestmax [max requests]');
 $.lang.register('ytplayer.command.ytp.setrequestmax.success', 'Maximum concurrent song requests set to $1');
+$.lang.register('ytplayer.command.ytp.setrequestmax.role.usage', 'Usage: !ytp setrequestmax [\'mod\', \'vip\', or \'sub\'] [max requests]');
+$.lang.register('ytplayer.command.ytp.setrequestmax.role.success', 'Maximum concurrent song requests for $1 role set to $2');
 
 $.lang.register('ytplayer.command.ytp.setmaxvidlength.usage', 'Usage: !ytp setmaxvidlength [seconds]');
 $.lang.register('ytplayer.command.ytp.setmaxvidlength.success', 'Maximum song request length set to $1 seconds.');
