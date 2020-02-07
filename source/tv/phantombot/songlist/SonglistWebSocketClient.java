@@ -23,6 +23,8 @@ import org.json.JSONObject;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
+import tv.phantombot.googledocs.GoogleSheetsHelper;
+
 public class SonglistWebSocketClient extends WebSocketClient {
 
     public static final String DATABASE_TABLE_NAME = "spreadsheetsSonglist";

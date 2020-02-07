@@ -78,6 +78,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import tv.phantombot.aliaslist.AliaslistWebSocketClient;
 import tv.phantombot.cache.DonationsCache;
 import tv.phantombot.cache.EmotesCache;
 import tv.phantombot.cache.FollowersCache;
@@ -117,9 +118,10 @@ import tv.phantombot.script.ScriptApi;
 import tv.phantombot.script.ScriptEventManager;
 import tv.phantombot.script.ScriptManager;
 import tv.phantombot.script.ScriptFileWatcher;
-import tv.phantombot.twitchwsirc.chat.Session;
-import tv.phantombot.twitchwsirc.pubsub.TwitchPubSub;
-import tv.phantombot.twitchwsirc.host.TwitchWSHostIRC;
+import tv.phantombot.twitch.irc.TwitchSession;
+import tv.phantombot.twitch.pubsub.TwitchPubSub;
+import tv.phantombot.twitch.pubsub.TwitchPubSubChannelPoints;
+import tv.phantombot.twitch.irc.host.TwitchWSHostIRC;
 import tv.phantombot.ytplayer.YTWebSocketServer;
 import tv.phantombot.ytplayer.YTWebSocketSecureServer;
 import tv.phantombot.discord.DiscordAPI;
@@ -224,6 +226,7 @@ public final class PhantomBot implements Listener {
 
     /* Socket Servers */
     private SonglistWebSocketClient songlistWebSocketClient;
+    private AliaslistWebSocketClient aliaslistWebSocketClient;
     private YTWebSocketServer youtubeSocketServer;
     private YTWebSocketSecureServer youtubeSocketSecureServer;
     private PanelSocketServer panelSocketServer;
@@ -258,6 +261,7 @@ public final class PhantomBot implements Listener {
     private Boolean joined = false;
     private TwitchWSHostIRC wsHostIRC;
     private TwitchPubSub pubSubEdge;
+    private TwitchPubSubChannelPoints twitchPubSubChannelPoints;
     private Properties pbProperties;
     private Boolean legacyServers = false;
     private Boolean backupSQLiteAuto = false;
@@ -889,6 +893,22 @@ public final class PhantomBot implements Listener {
                     httpServer = new HTTPServer(bindIP, (basePort), oauth, webOAuth, panelUsername, panelPassword);
                     print("HTTP server accepting connection on port: " + basePort);
                 }
+
+                /* Is the alias module enabled? */
+                if (dataStore.GetString("modules", "", "./commands/customCommands.js").equalsIgnoreCase("true") ||
+                    dataStore.GetString("modules", "", "./custom/customCommands.js").equalsIgnoreCase("true")
+                ) {
+                    /* Set up the Google Spreadsheet socket for aliases */
+                    URI uri = new URI(
+                        useHttps ? "wss" : "ws", // scheme
+                        "//" + (bindIP.isEmpty() ? "localhost" : bindIP) + ":" + panelSocketPort, // authority
+                        ""
+                    );
+                    aliaslistWebSocketClient = new AliaslistWebSocketClient(uri, dataStore);
+                    aliaslistWebSocketClient.setConnectionLostTimeout(0);
+                    aliaslistWebSocketClient.connect();
+                }
+
             } catch (Exception ex) {
                 print("Exception occurred in one of the socket based services, PhantomBot will now exit.");
                 System.exit(0);
@@ -1214,6 +1234,7 @@ public final class PhantomBot implements Listener {
         if (this.oauth.length() > 0 && checkDataStore("chatModerator", "moderationLogs")) {
             this.pubSubEdge = TwitchPubSub.instance(this.channelName, TwitchAPIv5.instance().getChannelId(this.channelName), TwitchAPIv5.instance().getChannelId(this.botName), this.oauth);
         }
+        // this.twitchPubSubChannelPoints = TwitchPubSubChannelPoints.instance(this.channelName, TwitchAPIv5.instance().getChannelId(this.channelName), TwitchAPIv5.instance().getChannelId(this.botName), this.apiOAuth);
 
         /* Load the caches for each channels */
         this.twitchCache = TwitchCache.instance(this.channelName);

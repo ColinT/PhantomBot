@@ -1,4 +1,4 @@
-package tv.phantombot.songlist;
+package tv.phantombot.googledocs;
 
 import java.io.File;
 import java.io.FileInputStream;

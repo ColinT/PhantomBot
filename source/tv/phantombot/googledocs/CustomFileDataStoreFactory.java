@@ -9,7 +9,7 @@
  * 
  */
 
-package tv.phantombot.songlist;
+package tv.phantombot.googledocs;
 
 import com.google.api.client.util.IOUtils;
 import com.google.api.client.util.Maps;
