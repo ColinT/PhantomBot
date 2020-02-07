@@ -4,7 +4,7 @@
  * to provide our own implementation.
  */
 
-package tv.phantombot.songlist;
+package tv.phantombot.googledocs;
 
 import java.awt.Desktop;
 import java.io.IOException;

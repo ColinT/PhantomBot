@@ -5,7 +5,7 @@
  * environment, so we must provide our own implementation.
  */
 
-package tv.phantombot.songlist;
+package tv.phantombot.googledocs;
 
 import com.google.api.client.extensions.java6.auth.oauth2.VerificationCodeReceiver;
 import com.google.api.client.util.Throwables;
