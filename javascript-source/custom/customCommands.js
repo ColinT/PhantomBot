@@ -1436,7 +1436,7 @@
         }
 
         /**
-          * @commandpath songlist - Display a link to the google spreadsheets songlist
+          * @commandpath aliaslist - Display a link to the google spreadsheets aliaslist
           */
         if (command.equalsIgnoreCase('aliaslist')) {
             const aliaslistDbTableName = Packages.tv.phantombot.aliaslist.AliaslistWebSocketClient.DATABASE_TABLE_NAME;
