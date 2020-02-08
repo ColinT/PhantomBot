@@ -151,7 +151,7 @@ public class AliaslistWebSocketClient extends WebSocketClient {
             return dataStore.GetString(AliaslistWebSocketClient.DATABASE_TABLE_NAME, "", "spreadsheetId");
         } else {
             // Create a new sheet
-            String spreadsheetId = GoogleSheetsHelper.createSheet();
+            String spreadsheetId = GoogleSheetsHelper.createSheet("Aliaslist");
             dataStore.SetString(AliaslistWebSocketClient.DATABASE_TABLE_NAME, "", "spreadsheetId", spreadsheetId);
             return spreadsheetId;
         }
