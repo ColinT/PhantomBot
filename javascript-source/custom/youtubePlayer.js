@@ -963,7 +963,7 @@
          */
         this.updateCurrentSongFile = function(youtubeVideo) {
             $.writeToFile(
-                youtubeVideo.getVideoTitle() + ' ',
+                youtubeVideo.getVideoTitle() + ' — requested by ' + youtubeVideo.getOwner(),
                 baseFileOutputPath + 'currentsong.txt',
                 false
             );
