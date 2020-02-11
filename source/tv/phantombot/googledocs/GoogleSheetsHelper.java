@@ -36,7 +36,7 @@ import com.google.api.services.sheets.v4.model.ValueRange;
 public class GoogleSheetsHelper {
 
     private static final String APPLICATION_NAME = "PhantomBot Songlist";
-    private static final String CREDENTIALS_FILE_PATH = "config/spreadsheet-credentials.json";
+    private static final String CREDENTIALS_FILE_PATH = "config\\spreadsheet-credentials.json";
     private static final List<String> SCOPES = Collections.singletonList(SheetsScopes.DRIVE_FILE);
     private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
     private static final String TOKENS_DIRECTORY_PATH = "tokens";
@@ -93,7 +93,7 @@ public class GoogleSheetsHelper {
      */
     private static Credential getCredentials(final NetHttpTransport HTTP_TRANSPORT) throws IOException {
         // Check if file exists
-        String filePath = new File("").getAbsolutePath() + "/" + GoogleSheetsHelper.CREDENTIALS_FILE_PATH;
+        String filePath = new File("").getAbsolutePath() + "\\" + GoogleSheetsHelper.CREDENTIALS_FILE_PATH;
         File file = new File(filePath);
         if (!file.exists()) {
             throw new FileNotFoundException("Resource not found: " + filePath);
