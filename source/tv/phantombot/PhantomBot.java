@@ -922,6 +922,7 @@ public final class PhantomBot implements Listener {
                 }
 
             } catch (Exception ex) {
+                ex.printStackTrace();
                 print("Exception occurred in one of the socket based services, PhantomBot will now exit.");
                 PhantomBot.exitError();
             }
