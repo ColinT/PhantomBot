@@ -95,6 +95,8 @@ public class GoogleSheetsHelper {
         // Check if file exists
         File file = new File(GoogleSheetsHelper.CREDENTIALS_FILE_PATH);
         if (!file.exists()) {
+            String filePath = new File("").getAbsolutePath();
+            com.gmt2001.Console.out.println("The working directory is: " + filePath);
             throw new FileNotFoundException("Resource not found: " + GoogleSheetsHelper.CREDENTIALS_FILE_PATH);
         }
 
