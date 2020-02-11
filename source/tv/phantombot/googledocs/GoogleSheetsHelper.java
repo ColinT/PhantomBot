@@ -94,12 +94,14 @@ public class GoogleSheetsHelper {
     private static Credential getCredentials(final NetHttpTransport HTTP_TRANSPORT) throws IOException {
         // Check if file exists
         String filePath = new File("").getAbsolutePath() + "\\" + GoogleSheetsHelper.CREDENTIALS_FILE_PATH;
-        File file = new File(filePath);
-        if (!file.exists()) {
-            throw new FileNotFoundException("Resource not found: " + filePath);
-        }
 
-        FileInputStream in = new FileInputStream(filePath);
+        FileInputStream in;
+        try {
+            in = new FileInputStream(filePath);
+        } catch (FileNotFoundException e) {
+            com.gmt2001.Console.out.println("Resource not found: " + filePath);
+            throw e;
+        }
 
         GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(GoogleSheetsHelper.JSON_FACTORY, new InputStreamReader(in));
 
