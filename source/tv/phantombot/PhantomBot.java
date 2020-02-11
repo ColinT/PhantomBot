@@ -895,9 +895,7 @@ public final class PhantomBot implements Listener {
                 }
 
                 /* Is the alias module enabled? */
-                if (dataStore.GetString("modules", "", "./commands/customCommands.js").equalsIgnoreCase("true") ||
-                    dataStore.GetString("modules", "", "./custom/customCommands.js").equalsIgnoreCase("true")
-                ) {
+                if (dataStore.GetString("modules", "", "./custom/customCommands.js").equalsIgnoreCase("true")) {
                     /* Set up the Google Spreadsheet socket for aliases */
                     URI uri = new URI(
                         useHttps ? "wss" : "ws", // scheme
