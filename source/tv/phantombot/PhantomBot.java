@@ -898,21 +898,21 @@ public final class PhantomBot implements Listener {
                 }
 
                 /* Is the custom alias module enabled? */
-                if (dataStore.GetString("modules", "", "./custom/customCommands.js").equalsIgnoreCase("true")) {
-                    /* Set up the Google Spreadsheet socket for aliases */
-                    URI uri = new URI(
-                        useHttps ? "wss" : "ws", // scheme
-                        "//" + (bindIP.isEmpty() ? "localhost" : bindIP) + ":" + panelSocketPort, // authority
-                        ""
-                    );
-                    try {
+                try {
+                    if (dataStore.GetString("modules", "", "./custom/customCommands.js").equalsIgnoreCase("true")) {
+                        /* Set up the Google Spreadsheet socket for aliases */
+                        URI uri = new URI(
+                            useHttps ? "wss" : "ws", // scheme
+                            "//" + (bindIP.isEmpty() ? "localhost" : bindIP) + ":" + panelSocketPort, // authority
+                            ""
+                        );
                         aliaslistWebSocketClient = new AliaslistWebSocketClient(uri, dataStore);
                         aliaslistWebSocketClient.setConnectionLostTimeout(0);
                         aliaslistWebSocketClient.connect();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    } 
-                }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                } 
 
             } catch (Exception ex) {
                 ex.printStackTrace();
