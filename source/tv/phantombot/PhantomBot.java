@@ -844,19 +844,22 @@ public final class PhantomBot implements Listener {
                         print("YouTubeSocketServer accepting connections on port: " + ytSocketPort);
                     }
 
-                    /* Start the songlist service */
-                    URI uri = new URI(
-                        useHttps ? "wss" : "ws", // scheme
-                        "//" + (bindIP.isEmpty() ? "localhost" : bindIP) + ":" + ytSocketPort, // authority
-                        ""
-                    );
-                    try {
-                        songlistWebSocketClient = new SonglistWebSocketClient(uri, dataStore);
-                        songlistWebSocketClient.setConnectionLostTimeout(0);
-                        songlistWebSocketClient.connect();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+                    /* Is the custom ytplayer module enabled? */
+                    if (dataStore.GetString("modules", "", "./custom/youtubePlayer.js").equalsIgnoreCase("true")) {
+                        /* Start the songlist service */
+                        URI uri = new URI(
+                            useHttps ? "wss" : "ws", // scheme
+                            "//" + (bindIP.isEmpty() ? "localhost" : bindIP) + ":" + ytSocketPort, // authority
+                            ""
+                        );
+                        try {
+                            songlistWebSocketClient = new SonglistWebSocketClient(uri, dataStore);
+                            songlistWebSocketClient.setConnectionLostTimeout(0);
+                            songlistWebSocketClient.connect();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }                   
                 }
 
                 if (useHttps) {
@@ -894,7 +897,7 @@ public final class PhantomBot implements Listener {
                     print("HTTP server accepting connection on port: " + basePort);
                 }
 
-                /* Is the alias module enabled? */
+                /* Is the custom alias module enabled? */
                 if (dataStore.GetString("modules", "", "./custom/customCommands.js").equalsIgnoreCase("true")) {
                     /* Set up the Google Spreadsheet socket for aliases */
                     URI uri = new URI(
@@ -902,9 +905,13 @@ public final class PhantomBot implements Listener {
                         "//" + (bindIP.isEmpty() ? "localhost" : bindIP) + ":" + panelSocketPort, // authority
                         ""
                     );
-                    aliaslistWebSocketClient = new AliaslistWebSocketClient(uri, dataStore);
-                    aliaslistWebSocketClient.setConnectionLostTimeout(0);
-                    aliaslistWebSocketClient.connect();
+                    try {
+                        aliaslistWebSocketClient = new AliaslistWebSocketClient(uri, dataStore);
+                        aliaslistWebSocketClient.setConnectionLostTimeout(0);
+                        aliaslistWebSocketClient.connect();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    } 
                 }
 
             } catch (Exception ex) {
