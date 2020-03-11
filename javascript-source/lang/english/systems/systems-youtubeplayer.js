@@ -55,6 +55,7 @@ $.lang.register('ytplayer.command.playlist.usage', 'Usage: !playlist [add | dele
 $.lang.register('ytplayer.command.playlist.add.failed', 'Failed to add song to playlist: $1');
 $.lang.register('ytplayer.command.playlist.add.usage', 'Usage: !ytp playlist add [youtube link]');
 $.lang.register('ytplayer.command.playlist.add.success', 'Success adding [$1] to playlist [$2]');
+$.lang.register('ytplayer.command.playlist.save.usage', 'Usage: !playlist savepl [playlist name]');
 $.lang.register('ytplayer.command.playlist.load.success.new', 'Loaded empty playlist [$1]');
 $.lang.register('ytplayer.command.playlist.load.success', 'Loaded playlist [$1]');
 $.lang.register('ytplayer.command.playlist.load.usage', 'Usage: !playlist loadpl [playlist name]');
@@ -128,6 +129,9 @@ $.lang.register('ytplayer.command.importpl.file.success.plerror', 'Import Comple
 $.lang.register('ytplayer.command.importpl.file.404', 'Could not find file $1');
 $.lang.register('ytplayer.command.importpl.file.registry404', 'List $1 was not created in DB, try again.');
 $.lang.register('ytplayer.command.importpl.file.usage', 'Usage: !playlist importpl file [playlist name] [filename]');
+
+$.lang.register('ytplayer.command.savepl.alreadyexists', 'A playlist with this name already exists. Delete it, then try again.');
+$.lang.register('ytplayer.command.savepl.success', 'Successfully saved current playlist as $1');
 
 $.lang.register('ytplayer.blacklisted', 'You have been blacklisted from using the songrequest feature.');
 $.lang.register('ytplayer.blacklist.usage', 'Usage: !ytp blacklistuser [add / remove]');

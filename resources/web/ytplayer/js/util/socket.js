@@ -301,6 +301,13 @@ $(function() {
         listeners[listener_id] = listener;
     };
 
+    player.saveCurrentPlaylist = (playlistName) => {
+        sendToSocket({
+            command: 'savepl',
+            playlistName
+        });
+    };
+
     /* Socket functions */
 
     /*

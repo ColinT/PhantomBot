@@ -113,6 +113,35 @@ $(function() {
         }))), onClose);
     };
 
+    /**
+     * @function getSavePlaylistModal - Generates a save playlist modal
+     * @param {string} inputId - 
+     * @param {Function} onClose - Callback function on modal closing
+     */
+    helpers.getSavePlaylistModal = (onClose, inputId) => {
+        const title = 'Save Current Playlist';
+        const btn = 'Save';
+        const label = 'Playlist name';
+        const placeholder = '';
+
+        return helpers.getModal('playlist-save-modal', title, btn, $('<div/>', {
+            'class': 'form-group'
+        }).append($('<label/>', {
+            'text': label
+        })).append($('<input/>', {
+            'class': 'form-control',
+            'type': 'text',
+            'placeholder': placeholder,
+            'id': inputId,
+            'focus': () => {
+                $(`#${inputId}`).attr('placeholder', '');
+            },
+            'blur': () => {
+                $(`#${inputId}`).attr('placeholder', placeholder);
+            }
+        })), onClose);
+    };
+
     /*
      * @function Generates a load playlist modal
      *

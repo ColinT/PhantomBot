@@ -521,6 +521,18 @@ $(function() {
         }).modal('toggle');
     });
 
+    // Save current playlist button.
+    $('#save-playlist-button').on('click', () => {
+        const inputId = 'new-playlist-name';
+        helpers.getSavePlaylistModal(inputId, () => {
+            const playlistName = $(`#${inputId}`).val();
+
+            if (playlistName.length > 0) {
+                player.
+            }
+        });
+    });
+
     // Load playlist button.
     $('#load-playlist-button').on('click', () => {
         player.dbQuery('get_playlists', 'yt_playlists_registry', (results) => {
