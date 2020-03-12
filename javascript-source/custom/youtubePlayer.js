@@ -414,6 +414,46 @@
         };
 
         /**
+         * @function createPlaylist
+         * @param {string} listName - Name to assign the playlist
+         * @returns {string} - Feedback message indicating success or error status
+         */
+        this.createPlaylist = function(listName) {
+            if ($.inidb.exists('yt_playlists_registry', playlistDbPrefix + listName)) {
+                return $.lang.get('ytplayer.command.createpl.alreadyexists');
+            } else {
+                $.setIniDbBoolean('yt_playlists_registry', playlistDbPrefix + listName, true);
+                $.inidb.AddFile(playlistDbPrefix + listName);
+
+                return $.lang.get('ytplayer.command.createpl.success', listName);
+            }
+        }
+
+        /**
+         * @function copyCurrentPlaylist
+         * @param {string} listName - Name to assign the playlist
+         * @returns {string} - Feedback message indicating success or error status
+         */
+        this.copyCurrentPlaylist = function(listName) {
+            if ($.inidb.exists('yt_playlists_registry', playlistDbPrefix + listName)) {
+                return $.lang.get('ytplayer.command.copypl.alreadyexists');
+            } else {
+                $.setIniDbBoolean('yt_playlists_registry', playlistDbPrefix + listName, true);
+                $.inidb.AddFile(playlistDbPrefix + listName);
+
+                $.inidb
+                    .GetKeyList(playListDbId, '')
+                    .filter(function (key) { return !key.equals('lastkey'); })
+                    .map(function(index) { return $.inidb.get(playListDbId, index); })
+                    .forEach(function (songId) {
+                        currentPlaylist.addToPlaylist(new YoutubeVideo(songId, playlistDJname), listName);
+                    });
+
+                return $.lang.get('ytplayer.command.copypl.success', listName);
+            }
+        }
+
+        /**
          * @function getplayListDbId
          * @return {String}
          */
@@ -1252,6 +1292,28 @@
     });
 
     /**
+     * @event yTPlayerCreatePlaylist
+     */
+    $.bind('yTPlayerCreatePlaylist', function(event) {
+        currentPlaylist.createPlaylist(event.getPlaylistName());
+    });
+
+    /**
+     * @event yTPlayerCopyPlaylist
+     */
+    $.bind('yTPlayerCopyPlaylist', function(event) {
+        currentPlaylist.copyCurrentPlaylist(event.getPlaylistName());
+        loadPanelPlaylist();
+    });
+
+    /**
+     * @event yTPlayerDeletePlaylist
+     */
+    $.bind('yTPlayerDeletePlaylist', function(event) {
+        currentPlaylist.deletePlaylist(event.getPlaylistName());
+    });
+
+    /**
      * @event yTPlayerLoadPlaylist
      */
     $.bind('yTPlayerLoadPlaylist', function(event) {
@@ -1802,7 +1864,7 @@
          * @commandpath playlist - Base command: Manage playlists
          */
         if (command.equalsIgnoreCase('playlist')) {
-            pActions = ['add', 'delete', 'loadpl', 'deletepl', 'importpl'].join(', ');
+            pActions = ['add', 'delete', 'copypl', 'loadpl', 'deletepl', 'importpl'].join(', ');
             action = args[0];
             actionArgs = args.splice(1);
 
@@ -1850,6 +1912,21 @@
                 }
                 currentPlaylist.deleteCurrentVideo();
                 return;
+            }
+
+            if (action.equalsIgnoreCase('copypl')) {
+                if (!connectedPlayerClient) {
+                    $.say($.whisperPrefix(sender) + $.lang.get('ytplayer.client.404'));
+                    return;
+                } else {
+                    if (actionArgs.length > 0) {
+                        $.say($.whisperPrefix(sender) + currentPlaylist.copyCurrentPlaylist(actionArgs[0]));
+                        return;
+                    } else {
+                        $.say($.whisperPrefix(sender) + $.lang.get('ytplayer.command.playlist.copy.usage'));
+                        return;
+                    }
+                }
             }
 
             /**
