@@ -146,7 +146,7 @@ $(function() {
 
                 // Add song name.
                 row.append($('<td/>', {
-                    'text': playlist[i].title,
+                    'text': decodeURIComponent(playlist[i].title),
                     'style': 'width: 70%;'
                 }));
 
@@ -239,7 +239,7 @@ $(function() {
 
                 // Add song name.
                 row.append($('<td/>', {
-                    'text': songlist[i].title
+                    'text': decodeURIComponent(songlist[i].title)
                 }));
 
                 // Add duration.
@@ -354,10 +354,10 @@ $(function() {
                 // Remove loader.
                 openPlayer(true);
                 // Alert the user.
-                toastr.info('Song queued: ' + (e.title.length > 30 ? e.title.substring(0, 30) + '...' : e.title));
+                toastr.info('Song queued: ' + (e.title.length > 30 ? e.title.substring(0, 30) + '...' : decodeURIComponent(e.title)));
             } else {
                 player.API.loadVideoById(e.play, 0, 'medium');
-                toastr.success('Now playing: ' +  (e.title.length > 30 ? e.title.substring(0, 30) + '...' : e.title));
+                toastr.success('Now playing: ' +  (e.title.length > 30 ? e.title.substring(0, 30) + '...' : decodeURIComponent(e.title)));
             }
 
             // Update the value under the slider.
@@ -384,7 +384,7 @@ $(function() {
             });
 
             // Update title information.
-            $('#video-title').html(e.title);
+            $('#video-title').html(decodeURIComponent(e.title));
             $('#video-url').html('<a href="https://youtu.be/' + e.play + '" target="_blank">https://youtu.be/' + e.play + '</a>');
             $('#user-requester').html(e.requester);
 
