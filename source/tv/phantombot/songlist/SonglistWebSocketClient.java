@@ -120,7 +120,7 @@ public class SonglistWebSocketClient extends WebSocketClient {
                     JSONObject rowObj = array.getJSONObject(i);
                     row.add((i + 1) + "");
                     row.add("=HYPERLINK(\"https://www.youtube.com/watch?v=" + rowObj.getString("song") + "\", \""
-                            + rowObj.getString("title") + "\")");
+                            + rowObj.getString("title").replace("\"", "\"\"") + "\")");
                     row.add(rowObj.getString("duration"));
                     row.add(rowObj.getString("requester"));
                     row.add(rowObj.getString("song"));
