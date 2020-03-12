@@ -57,6 +57,9 @@ import tv.phantombot.event.ytplayer.YTPlayerSongRequestEvent;
 import tv.phantombot.event.ytplayer.YTPlayerStateEvent;
 import tv.phantombot.event.ytplayer.YTPlayerStealSongEvent;
 import tv.phantombot.event.ytplayer.YTPlayerVolumeEvent;
+import tv.phantombot.event.ytplayer.YTPlayerCreatePlaylistEvent;
+import tv.phantombot.event.ytplayer.YTPlayerCopyPlaylistEvent;
+import tv.phantombot.event.ytplayer.YTPlayerDeletePlaylistEvent;
 
 /**
  *
@@ -264,6 +267,15 @@ public class WsYTHandler implements WsFrameHandler {
                         String dataString = jso.getString("search");
                         EventBus.instance().postAsync(new YTPlayerSongRequestEvent(dataString));
                     }
+                    break;
+                case "createpl":
+                    EventBus.instance().postAsync(new YTPlayerCreatePlaylistEvent(jso.getString("playlistName")));
+                    break;
+                case "copypl":
+                    EventBus.instance().postAsync(new YTPlayerCopyPlaylistEvent(jso.getString("playlistName")));
+                    break;
+                case "delpl":
+                    EventBus.instance().postAsync(new YTPlayerDeletePlaylistEvent(jso.getString("playlistName")));
                     break;
                 case "loadpl":
                     EventBus.instance().postAsync(new YTPlayerLoadPlaylistEvent(jso.getString("playlist")));
