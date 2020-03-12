@@ -781,6 +781,13 @@
         });
 
         /**
+         * @event yTPlayerPromoteRequestEvent
+         */
+        $api.on($script, 'yTPlayerPromoteRequest', function(event) {
+            callHook('yTPlayerPromoteRequest', event, false);
+        });
+
+        /**
          * @event yTPlayerCreatePlaylistEvent
          */
         $api.on($script, 'yTPlayerCreatePlaylist', function(event) {
