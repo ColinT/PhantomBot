@@ -113,6 +113,101 @@ $(function() {
         }))), onClose);
     };
 
+    /**
+     * @function getCreatePlaylistModal - Generates a create playlist modal
+     * @param {string} inputId - The id of the HTML Input element
+     * @param {Function} onClose - Callback function on modal closing
+     */
+    helpers.getCreatePlaylistModal = (inputId, onClose) => {
+        const title = 'Create Blank Playlist';
+        const btn = 'Create';
+        const label = 'New playlist name';
+        const placeholder = '';
+
+        return helpers.getModal('playlist-create-modal', title, btn, $('<div/>', {
+            'class': 'form-group'
+        }).append($('<label/>', {
+            'text': label
+        })).append($('<input/>', {
+            'class': 'form-control',
+            'type': 'text',
+            'placeholder': placeholder,
+            'id': inputId,
+            'focus': () => {
+                $(`#${inputId}`).attr('placeholder', '');
+            },
+            'blur': () => {
+                $(`#${inputId}`).attr('placeholder', placeholder);
+            }
+        })), onClose);
+    }
+
+    /**
+     * @function getCopyPlaylistModal - Generates a copy playlist modal
+     * @param {string} inputId - The id of the HTML Input element
+     * @param {Function} onClose - Callback function on modal closing
+     */
+    helpers.getCopyPlaylistModal = (inputId, onClose) => {
+        const title = 'Copy Current Playlist';
+        const btn = 'Copy';
+        const label = 'New playlist name';
+        const placeholder = '';
+
+        return helpers.getModal('playlist-copy-modal', title, btn, $('<div/>', {
+            'class': 'form-group'
+        }).append($('<label/>', {
+            'text': label
+        })).append($('<input/>', {
+            'class': 'form-control',
+            'type': 'text',
+            'placeholder': placeholder,
+            'id': inputId,
+            'focus': () => {
+                $(`#${inputId}`).attr('placeholder', '');
+            },
+            'blur': () => {
+                $(`#${inputId}`).attr('placeholder', placeholder);
+            }
+        })), onClose);
+    };
+
+    /**
+     * @function getDeletePlaylistModal - Generates a delete playlist modal
+     * @param {string[]} playlists - The names of available playlists
+     * @param {string} selectId - The id of the HTML Select element
+     * @param {Function} onClose - Callback function on modal closing
+     */
+    helpers.getDeletePlaylistModal = (playlists, selectId, onClose) => {
+        const title = 'Delete Playlist';
+        const btn = 'Delete';
+        const label = 'Playlist name';
+
+        return helpers.getModal('playlist-delete-modal', title, btn, $('<div/>', {
+            'class': 'form-group'
+        }).append($('<label/>', {
+            'text': label
+        })).append($('<select/>', {
+            'class': 'form-control',
+            'id': selectId,
+            'text': 'Select a playlist',
+            'style': 'width: 100%; cursor: pointer;',
+            'data-toggle': 'dropdown'
+        }).append($('<option/>', {
+            'html': 'Select a playlist',
+            'selected': 'true',
+            'disabled': 'true',
+            'hidden': 'true'
+        })).append(playlists.map(function(playlist) {
+            return $('<option/>', {
+                'html': playlist
+            });
+        })).append($('<option/>', {
+            'html': 'Select a playlist',
+            'disabled': 'true',
+            'hidden': 'true'
+        }))), onClose);
+    };
+
     /*
      * @function Generates a load playlist modal
      *

@@ -301,6 +301,27 @@ $(function() {
         listeners[listener_id] = listener;
     };
 
+    player.createPlaylist = (playlistName) => {
+        sendToSocket({
+            command: 'createpl',
+            playlistName
+        });
+    }
+
+    player.copyCurrentPlaylist = (playlistName) => {
+        sendToSocket({
+            command: 'copypl',
+            playlistName
+        });
+    };
+
+    player.deletePlaylist = (playlistName) => {
+        sendToSocket({
+            command: 'delpl',
+            playlistName
+        });
+    }
+
     /* Socket functions */
 
     /*
