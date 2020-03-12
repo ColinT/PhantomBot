@@ -142,6 +142,43 @@ $(function() {
         })), onClose);
     };
 
+    /**
+     * @function getDeletePlaylistModal - Generates a delete playlist modal
+     * @param {string[]} playlists - The names of available playlists
+     * @param {string} selectId - The id of the HTML Select element
+     * @param {Function} onClose - Callback function on modal closing
+     */
+    helpers.getDeletePlaylistModal = (playlists, selectId, onClose) => {
+        const title = 'Delete Playlist';
+        const btn = 'Delete';
+        const label = 'Playlist name';
+
+        return helpers.getModal('playlist-load-modal', title, btn, $('<div/>', {
+            'class': 'form-group'
+        }).append($('<label/>', {
+            'text': label
+        })).append($('<select/>', {
+            'class': 'form-control',
+            'id': selectId,
+            'text': 'Select a playlist',
+            'style': 'width: 100%; cursor: pointer;',
+            'data-toggle': 'dropdown'
+        }).append($('<option/>', {
+            'html': 'Select a playlist',
+            'selected': 'true',
+            'disabled': 'true',
+            'hidden': 'true'
+        })).append(playlists.map(function(playlist) {
+            return $('<option/>', {
+                'html': playlist
+            });
+        })).append($('<option/>', {
+            'html': 'Select a playlist',
+            'disabled': 'true',
+            'hidden': 'true'
+        }))), onClose);
+    };
+
     /*
      * @function Generates a load playlist modal
      *

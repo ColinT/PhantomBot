@@ -787,6 +787,13 @@
             callHook('yTPlayerCopyPlaylist', event, false);
         });
 
+        /**
+         * @event yTPlayerDeletePlaylistEvent
+         */
+        $api.on($script, 'yTPlayerDeletePlaylist', function(event) {
+            callHook('yTPlayerDeletePlaylist', event, false);
+        });
+
         /*
          * @event yTPlayerLoadPlaylistEvent
          */

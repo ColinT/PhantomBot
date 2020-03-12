@@ -308,6 +308,13 @@ $(function() {
         });
     };
 
+    player.deletePlaylist = (playlistName) => {
+        sendToSocket({
+            command: 'delpl',
+            playlistName
+        });
+    }
+
     /* Socket functions */
 
     /*

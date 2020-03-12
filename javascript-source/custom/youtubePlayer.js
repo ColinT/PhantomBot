@@ -1284,6 +1284,13 @@
     });
 
     /**
+     * @event yTPlayerDeletePlaylist
+     */
+    $.bind('yTPlayerDeletePlaylist', function(event) {
+        currentPlaylist.deletePlaylist(event.getPlaylistName());
+    });
+
+    /**
      * @event yTPlayerLoadPlaylist
      */
     $.bind('yTPlayerLoadPlaylist', function(event) {

@@ -301,6 +301,9 @@ public class YTWebSocketServer extends WebSocketServer {
                 case "copypl":
                     EventBus.instance().postAsync(new YTPlayerCopyPlaylistEvent(jsonObject.getString("playlistName")));
                     break;
+                case "delpl":
+                    EventBus.instance().postAsync(new YTPlayerDeletePlaylistEvent(jsonObject.getString("playlistName")));
+                    break;
                 case "loadpl":
                     EventBus.instance().postAsync(new YTPlayerLoadPlaylistEvent(jsonObject.getString("playlist")));
                     break;
