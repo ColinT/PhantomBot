@@ -130,8 +130,11 @@ $.lang.register('ytplayer.command.importpl.file.404', 'Could not find file $1');
 $.lang.register('ytplayer.command.importpl.file.registry404', 'List $1 was not created in DB, try again.');
 $.lang.register('ytplayer.command.importpl.file.usage', 'Usage: !playlist importpl file [playlist name] [filename]');
 
+$.lang.register('ytplayer.command.createpl.alreadyexists', 'A playlist with this name already exists. Delete it, then try again.');
+$.lang.register('ytplayer.command.createpl.success', 'Successfully created new playlist named $1.');
+
 $.lang.register('ytplayer.command.copypl.alreadyexists', 'A playlist with this name already exists. Delete it, then try again.');
-$.lang.register('ytplayer.command.copypl.success', 'Successfully saved current playlist as $1');
+$.lang.register('ytplayer.command.copypl.success', 'Successfully saved current playlist as $1.');
 
 $.lang.register('ytplayer.blacklisted', 'You have been blacklisted from using the songrequest feature.');
 $.lang.register('ytplayer.blacklist.usage', 'Usage: !ytp blacklistuser [add / remove]');

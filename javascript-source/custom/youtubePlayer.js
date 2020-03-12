@@ -414,6 +414,22 @@
         };
 
         /**
+         * @function createPlaylist
+         * @param {string} listName - Name to assign the playlist
+         * @returns {string} - Feedback message indicating success or error status
+         */
+        this.createPlaylist = function(listName) {
+            if ($.inidb.exists('yt_playlists_registry', playlistDbPrefix + listName)) {
+                return $.lang.get('ytplayer.command.createpl.alreadyexists');
+            } else {
+                $.setIniDbBoolean('yt_playlists_registry', playlistDbPrefix + listName, true);
+                $.inidb.AddFile(playlistDbPrefix + listName);
+
+                return $.lang.get('ytplayer.command.createpl.success', listName);
+            }
+        }
+
+        /**
          * @function copyCurrentPlaylist
          * @param {string} listName - Name to assign the playlist
          * @returns {string} - Feedback message indicating success or error status
@@ -1273,6 +1289,13 @@
                 }
             }
         }
+    });
+
+    /**
+     * @event yTPlayerCreatePlaylist
+     */
+    $.bind('yTPlayerCreatePlaylist', function(event) {
+        currentPlaylist.createPlaylist(event.getPlaylistName());
     });
 
     /**

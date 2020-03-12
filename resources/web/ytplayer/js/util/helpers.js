@@ -114,6 +114,35 @@ $(function() {
     };
 
     /**
+     * @function getCreatePlaylistModal - Generates a create playlist modal
+     * @param {string} inputId - The id of the HTML Input element
+     * @param {Function} onClose - Callback function on modal closing
+     */
+    helpers.getCreatePlaylistModal = (inputId, onClose) => {
+        const title = 'Create Blank Playlist';
+        const btn = 'Create';
+        const label = 'New playlist name';
+        const placeholder = '';
+
+        return helpers.getModal('playlist-create-modal', title, btn, $('<div/>', {
+            'class': 'form-group'
+        }).append($('<label/>', {
+            'text': label
+        })).append($('<input/>', {
+            'class': 'form-control',
+            'type': 'text',
+            'placeholder': placeholder,
+            'id': inputId,
+            'focus': () => {
+                $(`#${inputId}`).attr('placeholder', '');
+            },
+            'blur': () => {
+                $(`#${inputId}`).attr('placeholder', placeholder);
+            }
+        })), onClose);
+    }
+
+    /**
      * @function getCopyPlaylistModal - Generates a copy playlist modal
      * @param {string} inputId - The id of the HTML Input element
      * @param {Function} onClose - Callback function on modal closing
@@ -153,7 +182,7 @@ $(function() {
         const btn = 'Delete';
         const label = 'Playlist name';
 
-        return helpers.getModal('playlist-load-modal', title, btn, $('<div/>', {
+        return helpers.getModal('playlist-delete-modal', title, btn, $('<div/>', {
             'class': 'form-group'
         }).append($('<label/>', {
             'text': label

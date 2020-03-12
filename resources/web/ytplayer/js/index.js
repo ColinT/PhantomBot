@@ -521,6 +521,18 @@ $(function() {
         }).modal('toggle');
     });
 
+    // Create playlist button.
+    $('#create-playlist-button').on('click', () => {
+        const inputId = 'new-playlist-name';
+        helpers.getCreatePlaylistModal(inputId, () => {
+            const playlistName = $(`#${inputId}`).val();
+
+            if (playlistName.length > 0) {
+                player.createPlaylist(playlistName);
+            }
+        }).modal('toggle');
+    });
+
     // Copy current playlist button.
     $('#copy-playlist-button').on('click', () => {
         const inputId = 'new-playlist-name';

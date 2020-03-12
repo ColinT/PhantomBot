@@ -781,6 +781,13 @@
         });
 
         /**
+         * @event yTPlayerCreatePlaylistEvent
+         */
+        $api.on($script, 'yTPlayerCreatePlaylist', function(event) {
+            callHook('yTPlayerCreatePlaylist', event, false);
+        });
+
+        /**
          * @event yTPlayerCopyPlaylistEvent
          */
         $api.on($script, 'yTPlayerCopyPlaylist', function(event) {
