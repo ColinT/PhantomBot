@@ -114,17 +114,17 @@ $(function() {
     };
 
     /**
-     * @function getSavePlaylistModal - Generates a save playlist modal
-     * @param {string} inputId - 
+     * @function getCopyPlaylistModal - Generates a copy playlist modal
+     * @param {string} inputId - The id of the HTML Input element
      * @param {Function} onClose - Callback function on modal closing
      */
-    helpers.getSavePlaylistModal = (onClose, inputId) => {
-        const title = 'Save Current Playlist';
-        const btn = 'Save';
-        const label = 'Playlist name';
+    helpers.getCopyPlaylistModal = (inputId, onClose) => {
+        const title = 'Copy Current Playlist';
+        const btn = 'Copy';
+        const label = 'New playlist name';
         const placeholder = '';
 
-        return helpers.getModal('playlist-save-modal', title, btn, $('<div/>', {
+        return helpers.getModal('playlist-copy-modal', title, btn, $('<div/>', {
             'class': 'form-group'
         }).append($('<label/>', {
             'text': label

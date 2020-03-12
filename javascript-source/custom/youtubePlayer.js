@@ -414,24 +414,26 @@
         };
 
         /**
-         * @function saveCurrentPlaylist
+         * @function copyCurrentPlaylist
          * @param {string} listName - Name to assign the playlist
          * @returns {string} - Feedback message indicating success or error status
          */
-        this.saveCurrentPlaylist = function(listName) {
-            if ($.inidb.exists('yt_playlists_registry', `${playlistDbPrefix}${listName}`)) {
-                return $.lang.get('ytplayer.command.savepl.alreadyexists');
+        this.copyCurrentPlaylist = function(listName) {
+            if ($.inidb.exists('yt_playlists_registry', playlistDbPrefix + listName)) {
+                return $.lang.get('ytplayer.command.copypl.alreadyexists');
             } else {
-                this.preparePlaylist(listName); // Initializes the new playlist
-                
+                $.setIniDbBoolean('yt_playlists_registry', playlistDbPrefix + listName, true);
+                $.inidb.AddFile(playlistDbPrefix + listName);
+
                 $.inidb
                     .GetKeyList(playListDbId, '')
-                    .filter((key) => !key.equals('lastkey'))
-                    .forEach((songId) => {
-                        this.addToPlaylist(new YoutubeVideo(songId, playlistDJname), listName);
+                    .filter(function (key) { return !key.equals('lastkey'); })
+                    .map(function(index) { return $.inidb.get(playListDbId, index); })
+                    .forEach(function (songId) {
+                        currentPlaylist.addToPlaylist(new YoutubeVideo(songId, playlistDJname), listName);
                     });
 
-                return $.lang.get('ytplayer.command.savepl.success', listName);
+                return $.lang.get('ytplayer.command.copypl.success', listName);
             }
         }
 
@@ -1274,6 +1276,14 @@
     });
 
     /**
+     * @event yTPlayerCopyPlaylist
+     */
+    $.bind('yTPlayerCopyPlaylist', function(event) {
+        currentPlaylist.copyCurrentPlaylist(event.getPlaylistName());
+        loadPanelPlaylist();
+    });
+
+    /**
      * @event yTPlayerLoadPlaylist
      */
     $.bind('yTPlayerLoadPlaylist', function(event) {
@@ -1824,7 +1834,7 @@
          * @commandpath playlist - Base command: Manage playlists
          */
         if (command.equalsIgnoreCase('playlist')) {
-            pActions = ['add', 'delete', 'savepl', 'loadpl', 'deletepl', 'importpl'].join(', ');
+            pActions = ['add', 'delete', 'copypl', 'loadpl', 'deletepl', 'importpl'].join(', ');
             action = args[0];
             actionArgs = args.splice(1);
 
@@ -1874,16 +1884,16 @@
                 return;
             }
 
-            if (action.equalsIgnoreCase('savepl')) {
+            if (action.equalsIgnoreCase('copypl')) {
                 if (!connectedPlayerClient) {
                     $.say($.whisperPrefix(sender) + $.lang.get('ytplayer.client.404'));
                     return;
                 } else {
                     if (actionArgs.length > 0) {
-                        $.say($.whisperPrefix(sender) + currentPlaylist.saveCurrentPlaylist(actionArgs[0]));
+                        $.say($.whisperPrefix(sender) + currentPlaylist.copyCurrentPlaylist(actionArgs[0]));
                         return;
                     } else {
-                        $.say($.whisperPrefix(sender) + $.lang.get('ytplayer.command.playlist.save.usage'));
+                        $.say($.whisperPrefix(sender) + $.lang.get('ytplayer.command.playlist.copy.usage'));
                         return;
                     }
                 }

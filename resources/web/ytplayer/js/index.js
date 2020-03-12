@@ -521,16 +521,16 @@ $(function() {
         }).modal('toggle');
     });
 
-    // Save current playlist button.
-    $('#save-playlist-button').on('click', () => {
+    // Copy current playlist button.
+    $('#copy-playlist-button').on('click', () => {
         const inputId = 'new-playlist-name';
-        helpers.getSavePlaylistModal(inputId, () => {
+        helpers.getCopyPlaylistModal(inputId, () => {
             const playlistName = $(`#${inputId}`).val();
 
             if (playlistName.length > 0) {
-                player.
+                player.copyCurrentPlaylist(playlistName);
             }
-        });
+        }).modal('toggle');
     });
 
     // Load playlist button.

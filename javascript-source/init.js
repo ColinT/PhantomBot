@@ -780,6 +780,13 @@
             callHook('yTPlayerConnect', event, false);
         });
 
+        /**
+         * @event yTPlayerCopyPlaylistEvent
+         */
+        $api.on($script, 'yTPlayerCopyPlaylist', function(event) {
+            callHook('yTPlayerCopyPlaylist', event, false);
+        });
+
         /*
          * @event yTPlayerLoadPlaylistEvent
          */

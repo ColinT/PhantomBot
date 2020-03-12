@@ -301,9 +301,9 @@ $(function() {
         listeners[listener_id] = listener;
     };
 
-    player.saveCurrentPlaylist = (playlistName) => {
+    player.copyCurrentPlaylist = (playlistName) => {
         sendToSocket({
-            command: 'savepl',
+            command: 'copypl',
             playlistName
         });
     };
