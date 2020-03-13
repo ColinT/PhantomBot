@@ -313,6 +313,9 @@ public class YTWebSocketServer extends WebSocketServer {
                 case "deletecurrent":
                     EventBus.instance().postAsync(new YTPlayerDeleteCurrentEvent());
                     break;
+                case "promoterequest":
+                    EventBus.instance().postAsync(new YTPlayerPromoteRequestEvent(jsonObject.getInt("songRequestIndex")));
+                    break;
                 default:
                     com.gmt2001.Console.err.println("YTWebSocketServer: Bad ['command'] request passed ["+jsonString+"]");
                     break;
