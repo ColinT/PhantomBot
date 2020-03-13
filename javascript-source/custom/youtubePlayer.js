@@ -1295,7 +1295,8 @@
      * @event yTPlayerPromoteRequest
      */
     $.bind('yTPlayerPromoteRequest', function(event) {
-        currentPlaylist.moveSong(event.getSongRequestIndex().toString(), '0');
+        currentPlaylist.moveSong(event.getSongRequestIndex(), 0);
+        connectedPlayerClient.pushSongList();
     });
 
     /**

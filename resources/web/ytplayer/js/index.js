@@ -272,9 +272,11 @@ $(function() {
                             player.removeSongFromRequest($(e.currentTarget).data('song'));
                             // Hide the tooltip, or could stay opened.
                             $(e.currentTarget).tooltip('hide');
-                        } : (_e) => {
+                        } : (e) => {
                             // Promote request.
                             player.promoteRequest(i);
+                            // Hide the tooltip
+                            $(e.currentTarget).tooltip('hide');
                         }
                     })).append($('<button/>', {
                         'type': 'button',
