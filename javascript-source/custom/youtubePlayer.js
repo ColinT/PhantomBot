@@ -1003,7 +1003,7 @@
          */
         this.updateCurrentSongFile = function(youtubeVideo) {
             $.writeToFile(
-                youtubeVideo.getVideoTitle() + ' — requested by ' + youtubeVideo.getOwner(),
+                he.decode(youtubeVideo.getVideoTitle()) + ' — requested by ' + youtubeVideo.getOwner() + ' ',
                 baseFileOutputPath + 'currentsong.txt',
                 false
             );
@@ -1289,6 +1289,14 @@
                 }
             }
         }
+    });
+
+    /**
+     * @event yTPlayerPromoteRequest
+     */
+    $.bind('yTPlayerPromoteRequest', function(event) {
+        currentPlaylist.moveSong(event.getSongRequestIndex(), 0);
+        connectedPlayerClient.pushSongList();
     });
 
     /**

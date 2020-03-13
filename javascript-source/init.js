@@ -366,6 +366,9 @@
         loadScript('./core/initCommands.js', false, silentScriptsLoad);
         loadScript('./core/panelCommands.js', false, silentScriptsLoad);
 
+        // Load third party dependencies
+        loadScript('./he.js', false, silentScriptsLoad);
+
         // Load all the other modules.
         loadScriptRecursive('.', silentScriptsLoad);
 
@@ -778,6 +781,13 @@
          */
         $api.on($script, 'yTPlayerConnect', function(event) {
             callHook('yTPlayerConnect', event, false);
+        });
+
+        /**
+         * @event yTPlayerPromoteRequestEvent
+         */
+        $api.on($script, 'yTPlayerPromoteRequest', function(event) {
+            callHook('yTPlayerPromoteRequest', event, false);
         });
 
         /**
