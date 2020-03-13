@@ -146,7 +146,7 @@ $(function() {
 
                 // Add song name.
                 row.append($('<td/>', {
-                    'text': playlist[i].title,
+                    'text': he.decode(playlist[i].title),
                     'style': 'width: 70%;'
                 }));
 
@@ -239,7 +239,7 @@ $(function() {
 
                 // Add song name.
                 row.append($('<td/>', {
-                    'text': songlist[i].title
+                    'text': he.decode(songlist[i].title)
                 }));
 
                 // Add duration.
@@ -348,6 +348,7 @@ $(function() {
 
         // Add a listener for the play event.
         player.addListener('play', (e) => {
+            const decodedTitle = he.decode(e.title);
             // If this is the first load, start the player paused.
             if (player.firstLoad === true) {
                 // Queue the first video
@@ -359,10 +360,10 @@ $(function() {
                 // Remove loader.
                 openPlayer(true);
                 // Alert the user.
-                toastr.info('Song queued: ' + (e.title.length > 30 ? e.title.substring(0, 30) + '...' : e.title));
+                toastr.info('Song queued: ' + (decodedTitle.length > 30 ? decodedTitle.substring(0, 30) + '...' : decodedTitle));
             } else {
                 player.API.loadVideoById(e.play, 0, 'medium');
-                toastr.success('Now playing: ' +  (e.title.length > 30 ? e.title.substring(0, 30) + '...' : e.title));
+                toastr.success('Now playing: ' +  (decodedTitle.length > 30 ? decodedTitle.substring(0, 30) + '...' : decodedTitle));
             }
 
             // Update the value under the slider.
@@ -389,7 +390,7 @@ $(function() {
             });
 
             // Update title information.
-            $('#video-title').html(e.title);
+            $('#video-title').html(decodedTitle);
             $('#video-url').html('<a href="https://youtu.be/' + e.play + '" target="_blank">https://youtu.be/' + e.play + '</a>');
             $('#user-requester').html(e.requester);
 
@@ -465,13 +466,15 @@ $(function() {
     // Delete current song from playlist button.
     $('#del-cur-playlist-button').on('click', () => {
         player.deleteFromPlaylist();
-        toastr.success('Deleted from playlist: ' + (player.temp.title.length > 30 ? player.temp.title.substring(0, 30) + '...' : player.temp.title));
+        const decodedTitle = he.decode(player.temp.title);
+        toastr.success('Deleted from playlist: ' + (decodedTitle > 30 ? decodedTitle.substring(0, 30) + '...' : decodedTitle));
     });
 
     // Fav button to steal a song.
     $('#fav-button').on('click', () => {
         player.addSongToPlaylist();
-        toastr.success('Added to playlist: ' + (player.temp.title.length > 30 ? player.temp.title.substring(0, 30) + '...' : player.temp.title));
+        const decodedTitle = he.decode(player.temp.title);
+        toastr.success('Added to playlist: ' + (decodedTitle > 30 ? decodedTitle.substring(0, 30) + '...' : decodedTitle));
     });
 
     // Skip song button.
