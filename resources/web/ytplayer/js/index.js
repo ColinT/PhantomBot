@@ -114,191 +114,195 @@ $(function() {
 
         // Add a listener to load the main playlist.
         player.addListener('playlist', (e) => {
-            let table = [],
-                playlist = e.playlist;
+            player.dbQuery('ytSettings', 'indexingMode', (indexingMode) => {
+                let table = [],
+                    playlist = e.playlist;
 
-            // Set the playlist name.
-            $('#playlist-name').html('(' + e.playlistname + ')');
+                // Set the playlist name.
+                $('#playlist-name').html('(' + e.playlistname + ')');
 
-            // Table header.
-            table.push(($('<tr>').append($('<th/>', {
-                'style': 'width: 5%;',
-                'html': '#'
-            })).append($('<th/>', {
-                'style': 'width: 70%;',
-                'html': 'Song'
-            })).append($('<th/>', {
-                'style': 'width: 15%;',
-                'html': 'Duration'
-            })).append($('<th/>', {
-                'style': 'width: 10%; text-align: right; padding-right: 16px;',
-                'html': 'Actions'
-            }))).html());
+                // Table header.
+                table.push(($('<tr>').append($('<th/>', {
+                    'style': 'width: 5%;',
+                    'html': '#'
+                })).append($('<th/>', {
+                    'style': 'width: 70%;',
+                    'html': 'Song'
+                })).append($('<th/>', {
+                    'style': 'width: 15%;',
+                    'html': 'Duration'
+                })).append($('<th/>', {
+                    'style': 'width: 10%; text-align: right; padding-right: 16px;',
+                    'html': 'Actions'
+                }))).html());
+                
+                for (let i = 0; i < playlist.length; i++) {
+                    let row = $('<tr/>');
 
-            for (let i = 0; i < playlist.length; i++) {
-                let row = $('<tr/>');
+                    // Add position.
+                    row.append($('<td/>', {
+                        'text': i,
+                        'style': 'width: 5%;'
+                    }));
 
-                // Add position.
-                row.append($('<td/>', {
-                    'text': i,
-                    'style': 'width: 5%;'
-                }));
+                    // Add song name.
+                    row.append($('<td/>', {
+                        'text': he.decode(playlist[i].title),
+                        'style': 'width: 70%;'
+                    }));
 
-                // Add song name.
-                row.append($('<td/>', {
-                    'text': he.decode(playlist[i].title),
-                    'style': 'width: 70%;'
-                }));
+                    // Add duration.
+                    row.append($('<td/>', {
+                        'text': playlist[i].duration,
+                        'style': 'width: 15%;'
+                    }));
 
-                // Add duration.
-                row.append($('<td/>', {
-                    'text': playlist[i].duration,
-                    'style': 'width: 15%;'
-                }));
+                    // Add buttons.
+                    row.append($('<td/>', {
+                        'html': $('<div/>', {
+                            'class': 'btn-group btn-group-justified header-button'
+                        }).append($('<button/>', {
+                            'type': 'button',
+                            'class': 'btn btn-secondary btn-sm',
+                            'data-toggle': 'tooltip',
+                            'title': 'Play song',
+                            'data-song': playlist[i].song,
+                            'data-song-play': 'on',
+                            'html': $('<i/>', {
+                                'class': 'fas fa-play'
+                            })
+                        })).append($('<button/>', {
+                            'type': 'button',
+                            'class': 'btn btn-secondary btn-sm',
+                            'data-toggle': 'tooltip',
+                            'title': 'Delete song',
+                            'data-song': playlist[i].song,
+                            'data-song-remove': 'on',
+                            'html': $('<i/>', {
+                                'class': 'fas fa-trash'
+                            })
+                        })),
+                        'style': 'width: 10%;'
+                    }));
 
-                // Add buttons.
-                row.append($('<td/>', {
-                    'html': $('<div/>', {
-                        'class': 'btn-group btn-group-justified header-button'
-                    }).append($('<button/>', {
-                        'type': 'button',
-                        'class': 'btn btn-secondary btn-sm',
-                        'data-toggle': 'tooltip',
-                        'title': 'Play song',
-                        'data-song': playlist[i].song,
-                        'data-song-play': 'on',
-                        'html': $('<i/>', {
-                            'class': 'fas fa-play'
-                        })
-                    })).append($('<button/>', {
-                        'type': 'button',
-                        'class': 'btn btn-secondary btn-sm',
-                        'data-toggle': 'tooltip',
-                        'title': 'Delete song',
-                        'data-song': playlist[i].song,
-                        'data-song-remove': 'on',
-                        'html': $('<i/>', {
-                            'class': 'fas fa-trash'
-                        })
-                    })),
-                    'style': 'width: 10%;'
-                }));
+                    // Append the row.
+                    table.push(row[0].outerHTML);
+                }
 
-                // Append the row.
-                table.push(row[0].outerHTML);
-            }
+                // Render the data.
+                if (cluster !== null) {
+                    cluster.update(table);
+                } else {
+                    cluster = new Clusterize({
+                        rows: table,
+                        scrollId: 'playlist-table-id',
+                        contentId: 'playlist-content',
+                        callbacks: {
+                            clusterChanged: () => {
+                                // Remove old events and register new ones.
+                                $('[data-song-play="on"]').off().on('click', (e) => {
+                                    // Play the song.
+                                    player.updateSong($(e.currentTarget).data('song'));
+                                    // Hide the tooltip.
+                                    $(e.currentTarget).tooltip('hide');
+                                });
 
-            // Render the data.
-            if (cluster !== null) {
-                cluster.update(table);
-            } else {
-                cluster = new Clusterize({
-                    rows: table,
-                    scrollId: 'playlist-table-id',
-                    contentId: 'playlist-content',
-                    callbacks: {
-                        clusterChanged: () => {
-                            // Remove old events and register new ones.
-                            $('[data-song-play="on"]').off().on('click', (e) => {
-                                // Play the song.
-                                player.updateSong($(e.currentTarget).data('song'));
-                                // Hide the tooltip.
-                                $(e.currentTarget).tooltip('hide');
-                            });
-
-                            // Remove old events and register new ones.
-                            $('[data-song-remove="on"]').off().on('click', (e) => {
-                                // Delete the song.
-                                player.removeSongFromPlaylist($(e.currentTarget).data('song'));
-                                // Hide the tooltip.
-                                $(e.currentTarget).tooltip('hide');
-                                // Remove the row.
-                                $(e.currentTarget.closest('tr')).remove();
-                            });
+                                // Remove old events and register new ones.
+                                $('[data-song-remove="on"]').off().on('click', (e) => {
+                                    // Delete the song.
+                                    player.removeSongFromPlaylist($(e.currentTarget).data('song'));
+                                    // Hide the tooltip.
+                                    $(e.currentTarget).tooltip('hide');
+                                    // Remove the row.
+                                    $(e.currentTarget.closest('tr')).remove();
+                                });
+                            }
                         }
-                    }
-                });
-            }
+                    });
+                }
+            });
         });
 
         // Add a listener for the songrequest queue.
         player.addListener('songlist', (e) => {
-            let table = $('#queue-table-content'),
+            player.dbQuery('ytSettings', 'indexingMode', (indexingMode) => {
+                let table = $('#queue-table-content'),
                 songlist = e.songlist;
 
-            // Remove the current data from the table.
-            table.find('tr:gt(0)').remove();
+                // Remove the current data from the table.
+                table.find('tr:gt(0)').remove();
 
-            for (let i = 0; i < songlist.length; i++) {
-                let row = $('<tr/>');
+                for (let i = 0; i < songlist.length; i++) {
+                    let row = $('<tr/>');
 
-                // Add position.
-                row.append($('<td/>', {
-                    'text': i
-                }));
+                    // Add position.
+                    row.append($('<td/>', {
+                        'text': i + indexingMode
+                    }));
 
-                // Add song name.
-                row.append($('<td/>', {
-                    'text': he.decode(songlist[i].title)
-                }));
+                    // Add song name.
+                    row.append($('<td/>', {
+                        'text': he.decode(songlist[i].title)
+                    }));
 
-                // Add duration.
-                row.append($('<td/>', {
-                    'text': songlist[i].duration
-                }));
+                    // Add duration.
+                    row.append($('<td/>', {
+                        'text': songlist[i].duration
+                    }));
 
-                // Add requester.
-                row.append($('<td/>', {
-                    'text': songlist[i].requester
-                }));
+                    // Add requester.
+                    row.append($('<td/>', {
+                        'text': songlist[i].requester
+                    }));
 
-                // Add buttons.
-                row.append($('<td/>', {
-                    'html': $('<div/>', {
-                        'class': 'btn-group btn-group-justified header-button'
-                    }).append($('<button/>', {
-                        'type': 'button',
-                        'class': 'btn btn-secondary btn-sm',
-                        'data-toggle': 'tooltip',
-                        'data-song': songlist[i].song,
-                        'title': i === 0 ? 'Play song' : 'Promote song',
-                        'html': $('<i/>', {
-                            'class': i === 0 ? 'fas fa-play' : 'fas fa-star'
-                        }),
-                        'click': i === 0 ? (e) => {
-                            // Jump to the song.
-                            player.updateSong($(e.currentTarget).data('song'));
-                            // The song once jumped to it.
-                            player.removeSongFromRequest($(e.currentTarget).data('song'));
-                            // Hide the tooltip, or could stay opened.
-                            $(e.currentTarget).tooltip('hide');
-                        } : (e) => {
-                            // Promote request.
-                            player.promoteRequest(i);
-                            // Hide the tooltip
-                            $(e.currentTarget).tooltip('hide');
-                        }
-                    })).append($('<button/>', {
-                        'type': 'button',
-                        'class': 'btn btn-secondary btn-sm',
-                        'data-toggle': 'tooltip',
-                        'title': 'Delete song',
-                        'data-song': songlist[i].song,
-                        'html': $('<i/>', {
-                            'class': 'fas fa-trash'
-                        }),
-                        'click': (e) => {
-                            // Delete song.
-                            player.removeSongFromRequest($(e.currentTarget).data('song'));
-                            // Hide the tooltip, or could stay opened.
-                            $(e.currentTarget).tooltip('hide');
-                        }
-                    }))
-                }));
+                    // Add buttons.
+                    row.append($('<td/>', {
+                        'html': $('<div/>', {
+                            'class': 'btn-group btn-group-justified header-button'
+                        }).append($('<button/>', {
+                            'type': 'button',
+                            'class': 'btn btn-secondary btn-sm',
+                            'data-toggle': 'tooltip',
+                            'data-song': songlist[i].song,
+                            'title': i === 0 ? 'Play song' : 'Promote song',
+                            'html': $('<i/>', {
+                                'class': i === 0 ? 'fas fa-play' : 'fas fa-star'
+                            }),
+                            'click': i === 0 ? (e) => {
+                                // Jump to the song.
+                                player.updateSong($(e.currentTarget).data('song'));
+                                // The song once jumped to it.
+                                player.removeSongFromRequest($(e.currentTarget).data('song'));
+                                // Hide the tooltip, or could stay opened.
+                                $(e.currentTarget).tooltip('hide');
+                            } : (e) => {
+                                // Promote request.
+                                player.promoteRequest(i);
+                                // Hide the tooltip
+                                $(e.currentTarget).tooltip('hide');
+                            }
+                        })).append($('<button/>', {
+                            'type': 'button',
+                            'class': 'btn btn-secondary btn-sm',
+                            'data-toggle': 'tooltip',
+                            'title': 'Delete song',
+                            'data-song': songlist[i].song,
+                            'html': $('<i/>', {
+                                'class': 'fas fa-trash'
+                            }),
+                            'click': (e) => {
+                                // Delete song.
+                                player.removeSongFromRequest($(e.currentTarget).data('song'));
+                                // Hide the tooltip, or could stay opened.
+                                $(e.currentTarget).tooltip('hide');
+                            }
+                        }))
+                    }));
 
-                // Append the row.
-                table.append(row);
-            }
+                    // Append the row.
+                    table.append(row);
+                }
+            });
         });
 
         // Add a listener for the volume.
