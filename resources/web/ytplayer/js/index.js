@@ -261,16 +261,21 @@ $(function() {
                         'class': 'btn btn-secondary btn-sm',
                         'data-toggle': 'tooltip',
                         'data-song': songlist[i].song,
-                        'title': 'Play song',
+                        'title': i === 0 ? 'Play song' : 'Promote song',
                         'html': $('<i/>', {
-                            'class': 'fas fa-play'
+                            'class': i === 0 ? 'fas fa-play' : 'fas fa-star'
                         }),
-                        'click': (e) => {
+                        'click': i === 0 ? (e) => {
                             // Jump to the song.
                             player.updateSong($(e.currentTarget).data('song'));
                             // The song once jumped to it.
                             player.removeSongFromRequest($(e.currentTarget).data('song'));
                             // Hide the tooltip, or could stay opened.
+                            $(e.currentTarget).tooltip('hide');
+                        } : (e) => {
+                            // Promote request.
+                            player.promoteRequest(i);
+                            // Hide the tooltip
                             $(e.currentTarget).tooltip('hide');
                         }
                     })).append($('<button/>', {

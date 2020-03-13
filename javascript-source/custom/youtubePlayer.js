@@ -1292,6 +1292,14 @@
     });
 
     /**
+     * @event yTPlayerPromoteRequest
+     */
+    $.bind('yTPlayerPromoteRequest', function(event) {
+        currentPlaylist.moveSong(event.getSongRequestIndex(), 0);
+        connectedPlayerClient.pushSongList();
+    });
+
+    /**
      * @event yTPlayerCreatePlaylist
      */
     $.bind('yTPlayerCreatePlaylist', function(event) {
