@@ -17,6 +17,7 @@ import com.google.api.services.sheets.v4.model.Request;
 import com.google.api.services.sheets.v4.model.TextFormat;
 import com.google.api.services.sheets.v4.model.ValueRange;
 
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -118,9 +119,10 @@ public class SonglistWebSocketClient extends WebSocketClient {
                 for (int i = 0; i < array.length(); i++) {
                     ArrayList<Object> row = new ArrayList<Object>();
                     JSONObject rowObj = array.getJSONObject(i);
+                    String songTitle = StringEscapeUtils.unescapeHtml4(rowObj.getString("title")).replace("\"", "\"\"");
                     row.add((i + 1) + "");
                     row.add("=HYPERLINK(\"https://www.youtube.com/watch?v=" + rowObj.getString("song") + "\", \""
-                            + rowObj.getString("title") + "\")");
+                            + songTitle + "\")");
                     row.add(rowObj.getString("duration"));
                     row.add(rowObj.getString("requester"));
                     row.add(rowObj.getString("song"));
@@ -141,8 +143,9 @@ public class SonglistWebSocketClient extends WebSocketClient {
                 List<List<Object>> values = new ArrayList<List<Object>>();
                 ArrayList<Object> row = new ArrayList<Object>();
                 row.add("Playing");
+                String songTitle = StringEscapeUtils.unescapeHtml4(command.getString("title")).replace("\"", "\"\"");
                 row.add("=HYPERLINK(\"https://www.youtube.com/watch?v=" + command.getString("play") + "\", \""
-                        + command.getString("title") + "\")");
+                        + songTitle + "\")");
                 row.add(command.getString("duration"));
                 row.add(command.getString("requester"));
                 row.add(command.getString("play"));
