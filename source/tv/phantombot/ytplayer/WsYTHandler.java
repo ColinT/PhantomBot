@@ -60,6 +60,7 @@ import tv.phantombot.event.ytplayer.YTPlayerVolumeEvent;
 import tv.phantombot.event.ytplayer.YTPlayerCreatePlaylistEvent;
 import tv.phantombot.event.ytplayer.YTPlayerCopyPlaylistEvent;
 import tv.phantombot.event.ytplayer.YTPlayerDeletePlaylistEvent;
+import tv.phantombot.event.ytplayer.YTPlayerPromoteRequestEvent;
 
 /**
  *
@@ -282,6 +283,9 @@ public class WsYTHandler implements WsFrameHandler {
                     break;
                 case "deletecurrent":
                     EventBus.instance().postAsync(new YTPlayerDeleteCurrentEvent());
+                    break;
+                  case "promoterequest":
+                    EventBus.instance().postAsync(new YTPlayerPromoteRequestEvent(jso.getInt("songRequestIndex")));
                     break;
                 default:
                     break;
