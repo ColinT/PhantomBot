@@ -363,6 +363,7 @@ $(function() {
                 toastr.info('Song queued: ' + (decodedTitle.length > 30 ? decodedTitle.substring(0, 30) + '...' : decodedTitle));
             } else {
                 player.API.loadVideoById(e.play, 0, 'medium');
+                player.API.setVolume($('#volume-slider').slider('getValue')); // Reset the volume when a new song starts playing
                 toastr.success('Now playing: ' +  (decodedTitle.length > 30 ? decodedTitle.substring(0, 30) + '...' : decodedTitle));
             }
 
