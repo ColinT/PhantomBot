@@ -813,11 +813,10 @@
                     currentVideo = requests.poll();
                     exception = false;
                 } else {
-                    if (defaultPlaylist.length == 0) {
-                        if (this.loadPlaylistKeys() == 0) {
-                            return new YoutubeVideo('r9NsG7pMwNk', playlistDJname);
+                    if (defaultPlaylist.length === 0) {
+                        if (this.loadPlaylistKeys() === 0) {
+                            return null;
                         }
-                        return new YoutubeVideo('r9NsG7pMwNk', playlistDJname);
                     }
 
                     try {
