@@ -556,6 +556,9 @@
          */
         this.deletePlaylist = function(listName) {
             if ($.inidb.exists('yt_playlists_registry', 'ytPlaylist_' + listName)) {
+                if (activePlaylistname.equals(listName)) { // If the active playlist was deleted, reset it to the default
+                    $.inidb.setIniDbString('ytSettings', 'activePlaylistname', 'default');
+                }
                 $.inidb.del('yt_playlists_registry', 'ytPlaylist_' + listName);
                 $.inidb.RemoveFile('ytPlaylist_' + listName);
                 return true;
