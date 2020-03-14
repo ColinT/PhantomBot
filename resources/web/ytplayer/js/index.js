@@ -114,7 +114,8 @@ $(function() {
 
         // Add a listener to load the main playlist.
         player.addListener('playlist', (e) => {
-            player.dbQuery('ytSettings', 'indexingMode', (indexingMode) => {
+            player.dbQuery('yt_settings', 'ytSettings', (queryResults) => {
+                const indexingMode = parseInt(queryResults.indexingMode, 10) ?? 1;
                 let table = [],
                     playlist = e.playlist;
 
@@ -141,7 +142,7 @@ $(function() {
 
                     // Add position.
                     row.append($('<td/>', {
-                        'text': i,
+                        'text': i + indexingMode,
                         'style': 'width: 5%;'
                     }));
 
@@ -225,7 +226,8 @@ $(function() {
 
         // Add a listener for the songrequest queue.
         player.addListener('songlist', (e) => {
-            player.dbQuery('ytSettings', 'indexingMode', (indexingMode) => {
+            player.dbQuery('yt_settings', 'ytSettings', (queryResults) => {
+                const indexingMode = parseInt(queryResults.indexingMode, 10) ?? 1;
                 let table = $('#queue-table-content'),
                 songlist = e.songlist;
 
