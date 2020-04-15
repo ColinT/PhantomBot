@@ -90,7 +90,7 @@ $.lang.register('ytplayer.command.delrequest.success', 'Removed song with ID [$1
 $.lang.register('ytplayer.command.delrequest.404', 'Song requests do not have a song with an ID of [$1]');
 $.lang.register('ytplayer.command.delrequest.usage', 'Usage: !ytp delrequest [YouTube ID]');
 
-$.lang.register('ytplayer.command.delrequestat.success', 'Removed song at position [$1] and title of [$2] from song requests.');
+$.lang.register('ytplayer.command.delrequestat.success', 'Removed song at position [$1] requested by $2 titled $3 from song requests.');
 $.lang.register('ytplayer.command.delrequestat.404', 'Song requests do not have a song with an index of [$1].');
 $.lang.register('ytplayer.command.delrequestat.usage', 'Usage: !ytp delrequestat [index]');
 

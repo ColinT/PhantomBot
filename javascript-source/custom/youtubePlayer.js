@@ -881,15 +881,15 @@
         /**
          * @function removeSongAtIndex - Remove a song at the specified 0 indexed position
          * @param {String} indexString
-         * @returns {String|undefined}
+         * @returns {YoutubeVideo|undefined}
          */
         this.removeSongAtIndex = function(indexString) {
             const index = parseInt(indexString, 10);
             const requestsArray = requests.toArray();
             if (!isNaN(index) && index >= 0 && index < requestsArray.length) {
-                const songTitle = requestsArray[index].getVideoTitle();
+                const song = requestsArray[index];
                 requests.remove(requestsArray[index]);
-                return songTitle;
+                return song;
             }
         }
 
@@ -1591,9 +1591,9 @@
              */
             if (action.equalsIgnoreCase('delrequestat')) {
                 if (actionArgs[0]) {
-                    const removedSongTitle2 = currentPlaylist.removeSongAtIndex(actionArgs[0] - indexingMode);
-                    if (!!removedSongTitle2) {
-                        $.say($.whisperPrefix(sender) + $.lang.get('ytplayer.command.delrequestat.success', actionArgs[0], removedSongTitle2));
+                    const removedSong = currentPlaylist.removeSongAtIndex(actionArgs[0] - indexingMode);
+                    if (!!removedSong) {
+                        $.say($.whisperPrefix(sender) + $.lang.get('ytplayer.command.delrequestat.success', actionArgs[0], removedSong.getOwner(), removedSong.getVideoTitle()));
                         connectedPlayerClient.pushSongList();
                     } else {
                         $.say($.whisperPrefix(sender) + $.lang.get('ytplayer.command.delrequestat.404', actionArgs[0]));
