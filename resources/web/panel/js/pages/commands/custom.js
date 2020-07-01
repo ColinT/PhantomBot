@@ -15,11 +15,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const useCustomModule = true;
+const modulePath = useCustomModule ? './custom/customCommands.js' : './commands/customCommands.js';
+
 // Function that querys all of the data we need.
 $(run = function() {
     // Check if the module is enabled.
-    socket.getDBValue('custom_command_module', 'modules', './commands/customCommands.js', function(e) {
+    socket.getDBValue('custom_command_module', 'modules', modulePath, function(e) {
         // If the module is off, don't load any data.
+        debugger;
         if (!helpers.handleModuleLoadUp('customCommandsModule', e.modules)) {
             return;
         }
@@ -90,7 +94,7 @@ $(run = function() {
                         tables: ['command', 'permcom', 'cooldown', 'aliases', 'pricecom', 'paycom', 'commandtoken'],
                         keys: [command, command, command, command, command, command, command]
                     }, function() {
-                        socket.wsEvent('custom_command_remove_ws', './commands/customCommands.js', null, ['remove', String(command)], function() {
+                        socket.wsEvent('custom_command_remove_ws', modulePath, null, ['remove', String(command)], function() {
                             // Remove the table row.
                             table.row(row).remove().draw(false);
                         });
@@ -187,7 +191,7 @@ $(run = function() {
                                             commandReward.val(), commandResponse.val()]
                                 }, function() {
                                     // Register the custom command with the cache.
-                                    socket.wsEvent('custom_command_edit_ws', './commands/customCommands.js', null, ['edit', String(commandName.val()),
+                                    socket.wsEvent('custom_command_edit_ws', modulePath, null, ['edit', String(commandName.val()),
                                         commandResponse.val()], function() {
                                         // Add the cooldown to the cache.
                                         socket.wsEvent('custom_command_edit_cooldown_ws', './core/commandCoolDown.js', null,
@@ -218,7 +222,7 @@ $(function() {
     // Toggle for the module.
     $('#customCommandsModuleToggle').on('change', function() {
         // Enable the module then query the data.
-        socket.sendCommandSync('custom_commands_module_toggle_cmd', 'module ' + ($(this).is(':checked') ? 'enablesilent' : 'disablesilent') + ' ./commands/customCommands.js', run);
+        socket.sendCommandSync('custom_commands_module_toggle_cmd', 'module ' + ($(this).is(':checked') ? 'enablesilent' : 'disablesilent') + ' ' + modulePath, run);
     });
 
     // Add command button.
@@ -290,7 +294,7 @@ $(function() {
                             values: [commandCost.val(), helpers.getGroupIdByName(commandPermission.find(':selected').text(), true), commandReward.val(), commandResponse.val()]
                         }, function() {
                             // Register the custom command with the cache.
-                            socket.wsEvent('custom_command_add_ws', './commands/customCommands.js', null,
+                            socket.wsEvent('custom_command_add_ws', modulePath, null,
                                 ['add', commandName.val(), commandResponse.val()], function() {
                                 // Add the cooldown to the cache.
                                 socket.wsEvent('custom_command_cooldown_ws', './core/commandCoolDown.js', null,
