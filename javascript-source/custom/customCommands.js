@@ -21,7 +21,7 @@
         reCustomAPIJson = new RegExp(/\(customapijson ([\w\.:\/\$=\?\&\-]+)\s([\w\W]+)\)/), // URL[1], JSONmatch[2..n]
         reCustomAPITextTag = new RegExp(/{([\w\W]+)}/),
         reCommandTag = new RegExp(/\(command\s([\w]+)\)/),
-        tagCheck = new RegExp(/\(help=|\(views\)|\(subscribers\)|\(age\)|\(sender\)|\(@sender\)|\(baresender\)|\(random\)|\(1\)|\(2\)|\(3\)|\(count\)|\(pointname\)|\(points\)|\(currenttime|\(price\)|\(#|\(uptime\)|\(follows\)|\(game\)|\(status\)|\(touser\)|\(echo\)|\(alert [,.\w]+\)|\(readfile|\(1=|\(countdown=|\(countup=|\(downtime\)|\(pay\)|\(onlineonly\)|\(offlineonly\)|\(code=|\(followage\)|\(followdate\)|\(hours\)|\(gameinfo\)|\(titleinfo\)|\(gameonly=|\(useronly=|\(playtime\)|\(gamesplayed\)|\(pointtouser\)|\(lasttip\)|\(writefile .+\)|\(readfilerand|\(team_|\(commandcostlist\)|\(playsound |\(customapi |\(customapijson /),
+        tagCheck = new RegExp(/\(help=|\(views\)|\(subscribers\)|\(age\)|\(sender\)|\(@sender\)|\(baresender\)|\(random\)|\(1\)|\(2\)|\(3\)|\(count\)|\(pointname\)|\(points\)|\(currenttime|\(price\)|\(#|\(uptime\)|\(follows\)|\(game\)|\(status\)|\(touser\)|\(echo\)|\(alert [,.\w]+\)|\(readfile|\(readfileline|\(1=|\(countdown=|\(countup=|\(downtime\)|\(pay\)|\(onlineonly\)|\(offlineonly\)|\(code=|\(followage\)|\(followdate\)|\(hours\)|\(gameinfo\)|\(titleinfo\)|\(gameonly=|\(useronly=|\(playtime\)|\(gamesplayed\)|\(pointtouser\)|\(lasttip\)|\(writefile .+\)|\(readfilerand|\(team_|\(commandcostlist\)|\(playsound |\(customapi |\(customapijson /),
         customCommands = [],
         ScriptEventManager = Packages.tv.phantombot.script.ScriptEventManager,
         CommandEvent = Packages.tv.phantombot.event.command.CommandEvent;
@@ -120,6 +120,12 @@
         if (message.match(/\(readfile/)) {
             if (message.search(/\((readfile ([^)]+)\))/g) >= 0) {
                 message = $.replace(message, '(' + RegExp.$1, $.readFile('./addons/' + RegExp.$2.replace(/\.\./g, ''))[0]);
+            }
+        }
+
+        if (message.match(/\(readfileline/)) {
+            if (message.search(/\((readfileline ([^)]+)\))/g) >= 0) {
+                message = $.replace(message, '(' + RegExp.$1, $.readFile('./addons/' + RegExp.$2.replace(/\.\./g, ''))[parseInt(event.getArgs()[0], 10) - 1]);
             }
         }
 
