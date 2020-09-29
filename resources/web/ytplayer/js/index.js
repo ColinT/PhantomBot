@@ -176,6 +176,16 @@ $(function() {
                             'type': 'button',
                             'class': 'btn btn-secondary btn-sm',
                             'data-toggle': 'tooltip',
+                            'title': 'Add to queue',
+                            'data-song': playlist[i].song,
+                            'data-song-queue': 'on',
+                            'html': $('<i/>', {
+                                'class': 'fas fa-level-up-alt'
+                            })
+                        })).append($('<button/>', {
+                            'type': 'button',
+                            'class': 'btn btn-secondary btn-sm',
+                            'data-toggle': 'tooltip',
                             'title': 'Delete song',
                             'data-song': playlist[i].song,
                             'data-song-remove': 'on',
@@ -204,6 +214,13 @@ $(function() {
                                 $('[data-song-play="on"]').off().on('click', (e) => {
                                     // Play the song.
                                     player.updateSong($(e.currentTarget).data('song'));
+                                    // Hide the tooltip.
+                                    $(e.currentTarget).tooltip('hide');
+                                });
+
+                                $('[data-song-queue="on"]').off().on('click', (e) => {
+                                    // Queue the song.
+                                    player.requestSong($(e.currentTarget).data('song'));
                                     // Hide the tooltip.
                                     $(e.currentTarget).tooltip('hide');
                                 });
