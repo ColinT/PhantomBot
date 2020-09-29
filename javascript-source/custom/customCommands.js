@@ -125,7 +125,14 @@
 
         if (message.match(/\(readfileline/)) {
             if (message.search(/\((readfileline ([^)]+)\))/g) >= 0) {
-                message = $.replace(message, '(' + RegExp.$1, $.readFile('./addons/' + RegExp.$2.replace(/\.\./g, ''))[parseInt(event.getArgs()[0], 10) - 1]);
+                if (!!parseInt(event.getArgs()[0])) {
+                    message = $.replace(message, '(' + RegExp.$1, $.readFile('./addons/' + RegExp.$2.replace(/\.\./g, ''))[parseInt(event.getArgs()[0], 10) - 1]);
+                } else {
+                    var path = RegExp.$2;
+                    var path2 = RegExp.$1;
+                    var results = $.arrayShuffle($.readFile('./addons/' + path.trim().replace(/\.\./g, '')));
+                    message = $.replace(message, '(' + path2.trim(), $.randElement(results));
+                }
             }
         }
 
