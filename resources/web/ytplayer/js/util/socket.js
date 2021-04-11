@@ -306,7 +306,7 @@ $(function() {
             command: 'createpl',
             playlistName
         });
-    }
+    };
 
     player.copyCurrentPlaylist = (playlistName) => {
         sendToSocket({
@@ -320,7 +320,14 @@ $(function() {
             command: 'delpl',
             playlistName
         });
-    }
+    };
+
+    player.promoteRequest = (songRequestIndex) => {
+        sendToSocket({
+            command: 'promoterequest',
+            songRequestIndex
+        });
+    };
 
     /* Socket functions */
 
